@@ -1,11 +1,15 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
+import 'package:insta_app/standardresponse.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final GoogleSignIn _googleSignIn = new GoogleSignIn();
+
 
 Future<String> _testSignInWithGoogle() async {
   final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
@@ -26,6 +30,7 @@ Future<String> _testSignInWithGoogle() async {
   return 'signInWithGoogle succeeded: $user';
 }
 
+
 void main() => runApp(new MyApp());
 
 class MyApp extends StatelessWidget {
@@ -35,9 +40,14 @@ class MyApp extends StatelessWidget {
     return new MaterialApp(
       title: 'Insta Manager',
       theme: new ThemeData( primarySwatch: Colors.blue),
-      home: new LoginPage()
+      home: new LoginPage(),
     );
   }
+}
+
+class _LoginData {
+  String user = '';
+  String password = '';
 }
 
 class LoginPage extends StatefulWidget {
@@ -49,6 +59,38 @@ class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixi
 
   AnimationController _iconAnimationController;
   Animation<double> _iconAnimation;
+  _LoginData _data = new _LoginData();
+
+
+  Future<String> _login(_LoginData _data) async{
+    print("login");
+    http.Response response = await http.get("http://10.125.121.64:4567/api/v1/login?username=${_data.user}&password=${_data.password}",
+        headers: {
+          "Accept":"application/json"
+        }
+    );
+    print(response.body);
+
+    StandardResponse data = json.decode(response.body);
+    _showAlertLogin(data.status);
+  }
+
+
+  void submit() {
+      _login(this._data);
+  }
+
+  void _showAlertLogin(String value){
+    AlertDialog dialog = new AlertDialog(
+      content: new Text(value),
+      actions: <Widget>[
+        new FlatButton(
+            onPressed: (){Navigator.pop(context);},
+            child: new Text("OK")
+        )
+      ],
+    );
+  }
 
   @override
   void initState() {
@@ -64,7 +106,6 @@ class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixi
     _iconAnimationController.forward();
 
   }
-
 
   @override
   Widget build(BuildContext context){
@@ -94,25 +135,32 @@ class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixi
                     padding: const EdgeInsets.all(40.0) ,
                     child: new Column(
                       children: <Widget>[
-                        new TextFormField(
+                        new TextField(
                             decoration: new InputDecoration(
                                 labelText: "usuario"
                             ),
-                            keyboardType: TextInputType.text
+                            keyboardType: TextInputType.text,
+                            onChanged: (String value) {
+                              this._data.user = value;
+                            }
                         ),
-                        new TextFormField(
+                        new TextField(
                             decoration: new InputDecoration(
                                 labelText: "senha"
                             ),
                             keyboardType: TextInputType.text,
-                            obscureText: true
+                            obscureText: true,
+                            onChanged: (String value) {
+                              this._data.password = value;
+                            }
                         ),
                         new Padding(padding: const EdgeInsets.only(top: 20.0)),
                         new MaterialButton(
                           color: Colors.teal,
                           textColor: Colors.white,
                           child: new Text("Login"),
-                          onPressed:()=>{}
+                          onPressed: this.submit,
+                          splashColor: Colors.redAccent,
                         )
                       ]
                     ),
@@ -127,5 +175,4 @@ class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixi
     );
     }
   }
-
 

@@ -1,29 +1,46 @@
 class Account {
-  final long id;
+  final String id;
   final String username;
   final String fullName;
-  final Boolean isPrivate;
-  final Boolean isVerified;
+  final bool isPrivate;
+  final bool isVerified;
   final String biography;
   final String externalUrl;
-  final Integer followedBy;
-  final Integer follows;
+  final int followedBy;
+  final int follows;
   final String blockedByViewer;
-  final Boolean countryBlock;
-  final String externalUrlLinkshimmed;
-  final Boolean followedByViewer;
-  final Boolean followsViewer;
-  final Boolean hasBlockedViewer;
-  final Boolean hasRequestedViewer;
+  final bool countryBlock;
+  final bool followedByViewer;
+  final bool followsViewer;
+  final bool hasBlockedViewer;
+  final bool hasRequestedViewer;
   final String profilePicUrl;
   final String profilePicUrlHd;
-  final Boolean requestedByViewer;
+  final bool requestedByViewer;
   final String connectedFbPage;
-  final Boolean isUnpublished;
-  final PageObject<Media> media;
-  final Date lastUpdated = new Date();
+  final bool isUnpublished;
 
-  Account();
+  Account({
+            this.id,
+            this.username,
+            this.fullName,
+            this.isPrivate,
+            this.isVerified,
+            this.biography,
+            this.externalUrl,
+            this.followedBy,
+            this.follows,
+            this.blockedByViewer,
+            this.countryBlock,
+            this.followsViewer,
+            this.hasBlockedViewer,
+            this.hasRequestedViewer,
+            this.profilePicUrl,
+            this.profilePicUrlHd,
+            this.requestedByViewer,
+            this.connectedFbPage,
+            this.isUnpublished
+  });
 
   factory Account.fromJson(Map<String, dynamic> json) {
     return new Account(
@@ -38,7 +55,7 @@ class Account {
       follows: json['follows'],
       blockedByViewer: json['blockedByViewer'],
       countryBlock: json['countryBlock'],
-      externalUrlLinkshimmed: json['externalUrlLinkshimmed'],
+      externalUrlLinkshimmed: json['externalUrl'],
       followedByViewer: json['followedByViewer'],
       followsViewer: json['followsViewer'],
       hasBlockedViewer: json['hasBlockedViewer'],
@@ -47,9 +64,7 @@ class Account {
       profilePicUrlHd: json['profilePicUrlHd'],
       requestedByViewer: json['requestedByViewer'],
       connectedFbPage: json['connectedFbPage'],
-      isUnpublished: json['isUnpublished'],
-      media: json['media'],
-      lastUpdated: json['lastUpdated']
+      isUnpublished: json['isUnpublished']
     );
   }
 }
