@@ -64,15 +64,16 @@ class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixi
 
   Future<String> _login(_LoginData _data) async{
     print("login");
-    http.Response response = await http.get("http://10.125.121.64:4567/api/v1/login?username=${_data.user}&password=${_data.password}",
+    http.Response response = await http.get("http://192.168.0.25:4567/api/v1/login?username=${_data.user}&password=${_data.password}",
         headers: {
           "Accept":"application/json"
         }
     );
     print(response.body);
 
-    StandardResponse data = json.decode(response.body);
-    _showAlertLogin(data.status);
+    Map data = json.decode(response.body);
+    var dataAccount = new StandardResponse.fromJson(data);
+    _showAlertLogin(dataAccount.status);
   }
 
 
@@ -90,6 +91,7 @@ class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixi
         )
       ],
     );
+    showDialog(context: context, builder: (BuildContext context) => dialog);
   }
 
   @override

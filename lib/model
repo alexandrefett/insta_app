@@ -32,6 +32,7 @@ class Account {
             this.follows,
             this.blockedByViewer,
             this.countryBlock,
+            this.followedByViewer,
             this.followsViewer,
             this.hasBlockedViewer,
             this.hasRequestedViewer,
@@ -42,30 +43,27 @@ class Account {
             this.isUnpublished
   });
 
-  factory Account.fromJson(Map<String, dynamic> json) {
-    return new Account(
-      id: json['id'],
-      username: json['username'],
-      fullName: json['fullName'],
-      isPrivate: json['isPrivate'],
-      isVerified: json['isVerified'],
-      biography: json['biography'],
-      externalUrl: json['externalUrl'],
-      followedBy: json['followedBy'],
-      follows: json['follows'],
-      blockedByViewer: json['blockedByViewer'],
-      countryBlock: json['countryBlock'],
-      externalUrlLinkshimmed: json['externalUrl'],
-      followedByViewer: json['followedByViewer'],
-      followsViewer: json['followsViewer'],
-      hasBlockedViewer: json['hasBlockedViewer'],
-      hasRequestedViewer: json['hasRequestedViewer'],
-      profilePicUrl: json['profilePicUrl'],
-      profilePicUrlHd: json['profilePicUrlHd'],
-      requestedByViewer: json['requestedByViewer'],
-      connectedFbPage: json['connectedFbPage'],
-      isUnpublished: json['isUnpublished']
-    );
-  }
+  Account.fromJson(Map<String, dynamic> json)
+  :   id = json['id'],
+      username = json['username'],
+      fullName = json['fullName'],
+      isPrivate = json['isPrivate'],
+      isVerified = json['isVerified'],
+      biography = json['biography'],
+      externalUrl = json['externalUrl'],
+      followedBy = json['followedBy'],
+      follows = json['follows'],
+      blockedByViewer = json['blockedByViewer'],
+      countryBlock = json['countryBlock'],
+      followedByViewer = json['followedByViewer'],
+      followsViewer = json['followsViewer'],
+      hasBlockedViewer = json['hasBlockedViewer'],
+      hasRequestedViewer = json['hasRequestedViewer'],
+      profilePicUrl = json['profilePicUrl'],
+      profilePicUrlHd = json['profilePicUrlHd'],
+      requestedByViewer = json['requestedByViewer'],
+      connectedFbPage = json['connectedFbPage'],
+      isUnpublished = json['isUnpublished'];
+
 }
 
