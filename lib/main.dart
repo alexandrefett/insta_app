@@ -6,10 +6,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:insta_app/standardresponse.dart';
+import 'package:insta_app/second.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final GoogleSignIn _googleSignIn = new GoogleSignIn();
-
 
 Future<String> _testSignInWithGoogle() async {
   final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
@@ -34,13 +34,23 @@ Future<String> _testSignInWithGoogle() async {
 void main() => runApp(new MyApp());
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+
   @override
   Widget build(BuildContext context) {
+
+    void _pushToSecond(){
+      Navigator.pushNamed(
+          context,
+          "/second");
+    }
+
     return new MaterialApp(
       title: 'Insta Manager',
       theme: new ThemeData( primarySwatch: Colors.blue),
       home: new LoginPage(),
+      routes:<String, WidgetBuilder>{
+        "/second":(BuildContext context) => new Requested()
+      }
     );
   }
 }
@@ -61,10 +71,9 @@ class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixi
   Animation<double> _iconAnimation;
   _LoginData _data = new _LoginData();
 
-
   Future<String> _login(_LoginData _data) async{
     print("login");
-    http.Response response = await http.get("http://192.168.0.25:4567/api/v1/login?username=${_data.user}&password=${_data.password}",
+    http.Response response = await http.get("http://10.125.121.64:4567/api/v1/login?username=${_data.user}&password=${_data.password}",
         headers: {
           "Accept":"application/json"
         }
@@ -73,9 +82,11 @@ class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixi
 
     Map data = json.decode(response.body);
     var dataAccount = new StandardResponse.fromJson(data);
-    _showAlertLogin(dataAccount.status);
+    if(dataAccount.status=="SUCCESS")
+      Navigator.pushNamed(this.context,"/second");
+    else
+      _showAlertLogin(dataAccount.status);
   }
-
 
   void submit() {
       _login(this._data);
@@ -86,12 +97,12 @@ class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixi
       content: new Text(value),
       actions: <Widget>[
         new FlatButton(
-            onPressed: (){Navigator.pop(context);},
+            onPressed: (){},
             child: new Text("OK")
         )
       ],
     );
-    showDialog(context: context, builder: (BuildContext context) => dialog);
+    showDialog(context: this.context, builder: (BuildContext context) => dialog);
   }
 
   @override
