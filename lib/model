@@ -1,69 +1,29 @@
 class Account {
-  final String id;
-  final String username;
-  final String fullName;
-  final bool isPrivate;
-  final bool isVerified;
-  final String biography;
-  final String externalUrl;
-  final int followedBy;
-  final int follows;
-  final String blockedByViewer;
-  final bool countryBlock;
-  final bool followedByViewer;
-  final bool followsViewer;
-  final bool hasBlockedViewer;
-  final bool hasRequestedViewer;
-  final String profilePicUrl;
-  final String profilePicUrlHd;
-  final bool requestedByViewer;
-  final String connectedFbPage;
-  final bool isUnpublished;
+  String id;
+  String username;
+  String fullName;
+  bool isVerified;
+  bool followedByViewer;
+  bool followsViewer;
+  String profilePictureUrl;
+  bool requestedByViewer;
+  int date;
 
-  Account({
-            this.id,
-            this.username,
-            this.fullName,
-            this.isPrivate,
-            this.isVerified,
-            this.biography,
-            this.externalUrl,
-            this.followedBy,
-            this.follows,
-            this.blockedByViewer,
-            this.countryBlock,
-            this.followedByViewer,
-            this.followsViewer,
-            this.hasBlockedViewer,
-            this.hasRequestedViewer,
-            this.profilePicUrl,
-            this.profilePicUrlHd,
-            this.requestedByViewer,
-            this.connectedFbPage,
-            this.isUnpublished
-  });
+  Account.loading(){
+    username = "Loading...";
+  }
 
-  Account.fromJson(Map<String, dynamic> json)
-  :   id = json['id'],
-      username = json['username'],
-      fullName = json['fullName'],
-      isPrivate = json['isPrivate'],
-      isVerified = json['isVerified'],
-      biography = json['biography'],
-      externalUrl = json['externalUrl'],
-      followedBy = json['followedBy'],
-      follows = json['follows'],
-      blockedByViewer = json['blockedByViewer'],
-      countryBlock = json['countryBlock'],
-      followedByViewer = json['followedByViewer'],
-      followsViewer = json['followsViewer'],
-      hasBlockedViewer = json['hasBlockedViewer'],
-      hasRequestedViewer = json['hasRequestedViewer'],
-      profilePicUrl = json['profilePicUrl'],
-      profilePicUrlHd = json['profilePicUrlHd'],
-      requestedByViewer = json['requestedByViewer'],
-      connectedFbPage = json['connectedFbPage'],
-      isUnpublished = json['isUnpublished'];
-
+  Account.fromJson(Map<String, dynamic> json){
+    id = json['id'];
+    username = json['username'];
+    fullName = json['fullName'];
+    isVerified = json['isVerified'];
+    followedByViewer = json['followedByViewer'];
+    followsViewer = json['followsViewer'];
+    profilePictureUrl = json['profilePictureUrl'];
+    requestedByViewer = json['requestedByViewer'];
+    date = json['date'];
+  }
 }
+
 
