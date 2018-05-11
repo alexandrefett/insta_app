@@ -1,5 +1,5 @@
 class Account {
-  String id;
+  int id;
   String username;
   String fullName;
   bool isVerified;
@@ -13,16 +13,22 @@ class Account {
     username = "Loading...";
   }
 
-  Account.fromJson(Map<String, dynamic> json){
-    id = json['id'];
-    username = json['username'];
-    fullName = json['fullName'];
-    isVerified = json['isVerified'];
-    followedByViewer = json['followedByViewer'];
-    followsViewer = json['followsViewer'];
-    profilePictureUrl = json['profilePictureUrl'];
-    requestedByViewer = json['requestedByViewer'];
-    date = json['date'];
+  Account({this.id, this.username, this.fullName, this.isVerified,
+      this.followedByViewer, this.followsViewer, this.profilePictureUrl,
+      this.requestedByViewer, this.date});
+
+
+  factory Account.fromJson(Map<String, dynamic> json){
+    return new Account(
+    id: json['id'],
+    username: json['username'],
+    fullName: json['fullName'],
+    isVerified: json['isVerified'],
+    followedByViewer: json['followedByViewer'],
+    followsViewer: json['followsViewer'],
+    profilePictureUrl: json['profilePictureUrl'],
+    requestedByViewer: json['requestedByViewer'],
+    date: json['date']);
   }
 }
 

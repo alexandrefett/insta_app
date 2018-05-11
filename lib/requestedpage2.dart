@@ -26,36 +26,21 @@ class SecondPage extends StatefulWidget {
 }
 
 class _SecondPage extends State<SecondPage>{
-  int _total = 0;
+  final _accounts = new List<Account>();
+  final _checkedAccounts = new Set<Account>();
   int _offset = -1 * (new DateTime.now().millisecondsSinceEpoch);
-  var cachedaccount = new Map<int, Account>();
-  var offsetLoaded = new Map<int, bool>();
-
-  @override
-  void initState() {
-    _getTotal().then((int total) {
-      setState(() {
-        _total = total;
-      });
-    });
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context){
-    var listView = new ListView.builder(
-      itemCount: _total,
-        itemBuilder: (BuildContext context, int index){
-          Account account = _getAccount(index);
-          return new ListTile(
-            title: new Text(account.username)
-          );
-        }
-    );
     return new Scaffold(
       appBar:new AppBar(title: new Text("Requested Page"),
       ),
-      body: listView
+      body: new ListView.builder(itemBuilder: (context, index) {
+        if (index >= _accounts.length) {
+          _accounts.addAll(_getRequested(_offset, 20));
+        }
+        return _buildRow(_accounts[index], index);
+      })
     );
   }
 

@@ -2,7 +2,7 @@ import 'package:insta_app/model';
 class StandardResponse {
   String message;
   String status;
-  Map<String, dynamic> data;
+  dynamic data;
 
   StandardResponse({this.message, this.status, this.data});
 
