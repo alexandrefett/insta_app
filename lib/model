@@ -10,7 +10,7 @@ class Account {
   int date;
 
   Account.loading(){
-    username = "Loading...";
+    fullName = "Loading...";
   }
 
   Account({this.id, this.username, this.fullName, this.isVerified,

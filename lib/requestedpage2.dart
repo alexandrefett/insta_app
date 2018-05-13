@@ -26,26 +26,59 @@ class SecondPage extends StatefulWidget {
 }
 
 class _SecondPage extends State<SecondPage>{
-  final _accounts = new List<Account>();
-  final _checkedAccounts = new Set<Account>();
+
   int _offset = -1 * (new DateTime.now().millisecondsSinceEpoch);
+  var cacheddata = new Map<int, Account>();
+  var offsetLoaded = new Map<int, bool>();
+  int _total = 0;
 
   @override
-  Widget build(BuildContext context){
-    return new Scaffold(
-      appBar:new AppBar(title: new Text("Requested Page"),
-      ),
-      body: new ListView.builder(itemBuilder: (context, index) {
-        if (index >= _accounts.length) {
-          _accounts.addAll(_getRequested(_offset, 20));
+  void initState() {
+    _getTotal().then((int total) {
+      setState(() {
+        _total = total;
+      });
+    });
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var listView = new ListView.builder(
+        itemCount: _total,
+        itemBuilder: (BuildContext context, int index) {
+          Account data = _getData(index);
+          return new ListTile(
+            title: new Text(data.fullName),
+          );
         }
-        return _buildRow(_accounts[index], index);
-      })
+    );
+
+
+    return new Scaffold(
+      appBar: new AppBar(
+        title: new Text("Paged"),
+      ),
+      body: listView,
     );
   }
 
+
+  Future<int> _getTotal() async {
+    return 21;
+  }
+
+  void _updateDatas(int offset, List<Account> datas) {
+    setState((){
+      for (int i=0; i < datas.length; i++) {
+        cacheddata.putIfAbsent(offset + i, () => datas[i]);
+      }
+    });
+  }
+
   Future<List<Account>> _getRequested(int offset, int limit) async{
-    http.Response response = await http.get("http://10.125.121.64:4567/api/v1/requested?offset=$_offset&limit=$limit",
+    print("loading...:");
+    http.Response response = await http.get("http://192.168.0.25:4567/api/v1/requested?offset=$_offset&limit=20",
         headers: {
           "Accept":"application/json"
         }
@@ -63,8 +96,9 @@ class _SecondPage extends State<SecondPage>{
         datas.add(Account.fromJson(map));
       });
       setState((){
-        _offset = datas.elementAt(datas.length-1).date;
+        _offset = datas.elementAt(datas.length-1).date+1;
         print("offset:$_offset");
+        _total += datas.length;
       });
       return datas;
     }
@@ -74,31 +108,18 @@ class _SecondPage extends State<SecondPage>{
     }
   }
 
-  Account _getAccount(int index){
-    Account account = cachedaccount[index];
-    if(account==null){
-      int offset = _offset;
-      if(!offsetLoaded.containsKey(offset)){
-        offsetLoaded.putIfAbsent(offset, ()=> true);
-        _getRequested(offset, 20)
-            .then((List<Account> accounts) => _updateAccounts(offset, accounts));
+  Account _getData(int index) {
+    Account data = cacheddata[index];
+    if (data == null) {
+      int offset = index ~/ 20 * 20;
+      if (!offsetLoaded.containsKey(offset)) {
+        offsetLoaded.putIfAbsent(offset, () => true);
+        _getRequested(_offset, 20)
+            .then((List<Account> datas) => _updateDatas(offset, datas));
       }
-      account = new Account.loading();
+      data = new Account.loading();
     }
-    return account;
-  }
-
-  Future<int> _getTotal() async{
-    return 100;
-  }
-
-  void _updateAccounts(int offset, List<Account> accounts){
-    setState(() {
-      for(int i = 0;i<accounts.length;i++){
-        cachedaccount.putIfAbsent(offset+1, () => accounts[i]);
-      }
-
-    });
+    return data;
   }
 }
 

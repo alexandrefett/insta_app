@@ -6,7 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:insta_app/standardresponse.dart';
-import 'package:insta_app/requestedpage.dart';
+import 'package:insta_app/requestedpage2.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final GoogleSignIn _googleSignIn = new GoogleSignIn();
@@ -73,7 +73,7 @@ class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixi
 
   Future<String> _login(_LoginData _data) async{
     print("login");
-    http.Response response = await http.get("http://10.125.121.64:4567/api/v1/login?username=${_data.user}&password=${_data.password}",
+    http.Response response = await http.get("http://192.168.0.25:4567/api/v1/login?username=${_data.user}&password=${_data.password}",
         headers: {
           "Accept":"application/json"
         }

@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:insta_app/model';
 import 'package:insta_app/standardresponse.dart';
 
-class Requested extends StatelessWidget{
+class Requested2 extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
