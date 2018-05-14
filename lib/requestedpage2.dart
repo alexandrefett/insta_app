@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:insta_app/model';
@@ -48,10 +47,14 @@ class _SecondPage extends State<SecondPage>{
         itemCount: _total,
         itemBuilder: (BuildContext context, int index) {
           Account data = _getData(index);
-          return new ListTile(
-            title: new Text(data.fullName),
-          );
-        }
+             return new ListTile(
+              title: new Text(data.fullName),
+              //leading: new CircleAvatar(
+              //  backgroundImage: new NetworkImage(data.profilePictureUrl),
+              //),
+              subtitle: new Text(data.username),
+            );
+         }
     );
 
 
@@ -65,7 +68,7 @@ class _SecondPage extends State<SecondPage>{
 
 
   Future<int> _getTotal() async {
-    return 21;
+    return 1;
   }
 
   void _updateDatas(int offset, List<Account> datas) {
@@ -73,6 +76,7 @@ class _SecondPage extends State<SecondPage>{
       for (int i=0; i < datas.length; i++) {
         cacheddata.putIfAbsent(offset + i, () => datas[i]);
       }
+      _total += datas.length;
     });
   }
 
@@ -98,7 +102,7 @@ class _SecondPage extends State<SecondPage>{
       setState((){
         _offset = datas.elementAt(datas.length-1).date+1;
         print("offset:$_offset");
-        _total += datas.length;
+//        _total += datas.length;
       });
       return datas;
     }
