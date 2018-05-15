@@ -7,11 +7,12 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:insta_app/standardresponse.dart';
 import 'package:insta_app/requestedpage2.dart';
+import 'package:insta_app/user.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final GoogleSignIn _googleSignIn = new GoogleSignIn();
 
-Future<String> _testSignInWithGoogle() async {
+Future<String> _registerWithGoogle() async {
   final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
   final GoogleSignInAuthentication googleAuth =
   await googleUser.authentication;
@@ -27,9 +28,9 @@ Future<String> _testSignInWithGoogle() async {
   final FirebaseUser currentUser = await _auth.currentUser();
   assert(user.uid == currentUser.uid);
   print("this work user: $user");
+
   return 'signInWithGoogle succeeded: $user';
 }
-
 
 void main() => runApp(new MyApp());
 
@@ -37,15 +38,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    void _pushToSecond(){
-      Navigator.pushNamed(
-          context,
-          "/second");
-    }
-
     return new MaterialApp(
-      title: 'Insta Manager',
+      title: 'Register Page',
       theme: new ThemeData( primarySwatch: Colors.blue),
       home: new LoginPage(),
       routes:<String, WidgetBuilder>{
@@ -53,11 +47,6 @@ class MyApp extends StatelessWidget {
       }
     );
   }
-}
-
-class _LoginData {
-  String user = '';
-  String password = '';
 }
 
 class LoginPage extends StatefulWidget {
@@ -69,11 +58,44 @@ class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixi
 
   AnimationController _iconAnimationController;
   Animation<double> _iconAnimation;
-  _LoginData _data = new _LoginData();
+  User _data = new User();
 
-  Future<String> _login(_LoginData _data) async{
+  Future<String> _login(User _data) async{
     print("login");
-    http.Response response = await http.get("http://192.168.0.25:4567/api/v1/login?username=${_data.user}&password=${_data.password}",
+    http.Response response = await http.get("http://192.168.0.25:4567/api/v1/login?username=${_data.instagram}&password=${_data.instaPassword}",
+        headers: {
+          "Accept":"application/json"
+        }
+    );
+    print(response.body);
+
+    Map data = json.decode(response.body);
+    var dataAccount = new StandardResponse.fromJson(data);
+    if(dataAccount.status=="SUCCESS")
+      Navigator.pushNamed(this.context,"/second");
+    else
+      _showAlertLogin(dataAccount.status);
+  }
+
+  Future<String> _getInstagram(String uid) async{
+    print("register");
+    http.Response response = await http.get("http://192.168.0.25:4567/api/v1/user/register?uid=$uid",
+        headers: {
+          "Accept":"application/json"
+        }
+    );
+    print(response.body);
+
+    Map data = json.decode(response.body);
+    var dataAccount = new StandardResponse.fromJson(data);
+    _showAlertLogin(dataAccount.status);
+  }
+
+
+  Future<String> _register(User _data) async{
+    print("register");
+    http.Response response = await http.post("http://192.168.0.25:4567/api/v1/user/register",
+        body: json.encode(_data),
         headers: {
           "Accept":"application/json"
         }
@@ -117,7 +139,6 @@ class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixi
     );
     _iconAnimation.addListener(()=>this.setState((){}));
     _iconAnimationController.forward();
-
   }
 
   @override
@@ -150,26 +171,26 @@ class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixi
                       children: <Widget>[
                         new TextField(
                             decoration: new InputDecoration(
-                                labelText: "usuario"
+                                labelText: "Instagram"
                             ),
                             keyboardType: TextInputType.text,
                             onChanged: (String value) {
-                              this._data.user = value;
+                              this._data.instagram = value;
                             }
                         ),
                         new TextField(
                             decoration: new InputDecoration(
-                                labelText: "senha"
+                                labelText: "Senha"
                             ),
                             keyboardType: TextInputType.text,
                             obscureText: true,
                             onChanged: (String value) {
-                              this._data.password = value;
+                              this._data.instaPassword = value;
                             }
                         ),
                         new Padding(padding: const EdgeInsets.only(top: 20.0)),
                         new MaterialButton(
-                          color: Colors.teal,
+                          color: Colors.blueAccent,
                           textColor: Colors.white,
                           child: new Text("Login"),
                           onPressed: this.submit,
@@ -182,10 +203,9 @@ class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixi
           )
         ]
       )
-  //_testSignInWithGoogle();
     ]
     )
     );
-    }
+  }
   }
 
