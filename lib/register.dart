@@ -1,22 +1,28 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:insta_app/user.dart';
-import 'package:insta_app/standardresponse.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-class RegisterScreen extends StatelessWidget{
+final FirebaseAuth _auth = FirebaseAuth.instance;
+
+Future _updateUserInfo(User _data) async {
+  final UserUpdateInfo userUpdateInfo = new UserUpdateInfo();
+  userUpdateInfo.displayName = _data.name;
+  await _auth.updateProfile(userUpdateInfo);
+}
+
+User _data = new User();
+
+class RegisterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return new MaterialApp(
         title: 'Requested',
-        theme: new ThemeData(
-            primarySwatch: Colors.blue
-        ),
-        home: new RegisterPage()
-    );
+        theme: new ThemeData(primarySwatch: Colors.blue),
+        home: new RegisterPage());
   }
 }
 
@@ -25,30 +31,38 @@ class RegisterPage extends StatefulWidget {
   _RegisterPage createState() => _RegisterPage();
 }
 
-class _RegisterPage extends State<RegisterPage>{
-
+class _RegisterPage extends State<RegisterPage> {
   User _data = new User();
 
-  Future<String> _register(User _data) async{
-    print("register");
-    http.Response response = await http.post("http://192.168.0.25:4567/api/v1/register",
-        body: json.encode(_data),
-        headers: {
-          "Accept":"application/json"
-        }
-    );
-    print(response.body);
 
-    Map data = json.decode(response.body);
-    var dataAccount = new StandardResponse.fromJson(data);
-    if(dataAccount.status=="SUCCESS")
-      Navigator.pushNamed(this.context,"/second");
-    else
-      _showAlertLogin(dataAccount.status);
+  Future _registerWithEmail() async {
+    try {
+      final FirebaseUser user = await _auth.createUserWithEmailAndPassword(
+          email: _data.email, password: _data.name)
+          .then((onValue) {
+        _updateUserInfo(_data);
+      });
+      final FirebaseUser currentUser = await _auth.currentUser();
+      print(currentUser);
+    } catch (error) {
+      _showAlertLogin("register error");
+      print(error);
+    }
   }
 
-  void submit() {
-    _register(this._data);
+  void _showAlertLogin(String value) {
+    AlertDialog dialog = new AlertDialog(
+      content: new Text(value),
+      actions: <Widget>[
+        new FlatButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: new Text("OK"))
+      ],
+    );
+    showDialog(
+        context: context, builder: (BuildContext context) => dialog);
   }
 
   @override
@@ -59,66 +73,52 @@ class _RegisterPage extends State<RegisterPage>{
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-        backgroundColor: Colors.white30,
-        body: new Stack(
-            fit: StackFit.expand,
-            children: <Widget>[
-              new Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children:<Widget>[
-                    new Padding(padding: const EdgeInsets.only(top: 60.0)),
-                    new Form(
-                        child: new Theme(
-                            data: new ThemeData(
-                                primarySwatch: Colors.black12,
-                                inputDecorationTheme: new InputDecorationTheme(
-                                    labelStyle: new TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 20.0
-                                    ))),
-                            child: new Container(
-                              padding: const EdgeInsets.all(40.0) ,
-                              child: new Column(
-                                  children: <Widget>[
-                                    new TextField(
-                                        decoration: new InputDecoration(
-                                            labelText: "Instagram"
-                                        ),
-                                        keyboardType: TextInputType.text,
-                                        obscureText: true,
-                                        onChanged: (String value) {
-                                          this._data.instagram = value;
-                                        }
-                                    ),
-                                    new TextField(
-                                        decoration: new InputDecoration(
-                                            labelText: "instagram password"
-                                        ),
-                                        keyboardType: TextInputType.text,
-                                        obscureText: true,
-                                        onChanged: (String value) {
-                                          this._data.instaPassword = value;
-                                        }
-                                    ),
-                                    new Padding(padding: const EdgeInsets.only(top: 20.0)),
-                                    new MaterialButton(
-                                      color: Colors.teal,
-                                      textColor: Colors.white,
-                                      child: new Text("Login"),
-                                      onPressed: this.submit,
-                                      splashColor: Colors.redAccent,
-                                    )
-                                  ]
-                              ),
-                            )
-                        )
+        body: new Stack(fit: StackFit.expand, children: <Widget>[
+      new Column(crossAxisAlignment: CrossAxisAlignment.center, children: <
+          Widget>[
+        new Padding(padding: const EdgeInsets.only(top: 60.0)),
+        new Form(
+            child: new Theme(
+                data: new ThemeData(
+                    primarySwatch: Colors.teal,
+                    inputDecorationTheme: new InputDecorationTheme(
+                        labelStyle:
+                            new TextStyle(color: Colors.teal, fontSize: 20.0))),
+                child: new Container(
+                  padding: const EdgeInsets.all(40.0),
+                  child: new Column(children: <Widget>[
+                    new TextField(
+                        decoration: new InputDecoration(labelText: "Name"),
+                        keyboardType: TextInputType.text,
+                        obscureText: true,
+                        onChanged: (String value) {
+                          this._data.name = value;
+                        }),
+                    new TextField(
+                        decoration: new InputDecoration(labelText: "Email"),
+                        keyboardType: TextInputType.text,
+                        obscureText: true,
+                        onChanged: (String value) {
+                          this._data.email = value;
+                        }),
+                    new TextField(
+                        decoration: new InputDecoration(labelText: "Password"),
+                        keyboardType: TextInputType.text,
+                        obscureText: true,
+                        onChanged: (String value) {
+                          this._data.password = value;
+                        }),
+                    new Padding(padding: const EdgeInsets.only(top: 20.0)),
+                    new MaterialButton(
+                      color: Colors.blueAccent,
+                      textColor: Colors.white,
+                      child: new Text("Register with Email"),
+                      onPressed: _registerWithEmail,
                     )
-                  ]
-              )
-              //_testSignInWithGoogle();
-            ]
-        )
-    );
+                  ]),
+                )))
+      ])
+      //_testSignInWithGoogle();
+    ]));
   }
 }
-
