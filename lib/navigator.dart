@@ -95,32 +95,32 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
     super.initState();
     _navigationViews = <NavigationIconView>[
       new NavigationIconView(
-        icon: const Icon(Icons.access_alarm),
-        title: 'Alarm',
+        icon: const Icon(Icons.account_circle),
+        title: 'Profile',
         color: Colors.deepPurple,
         vsync: this,
       ),
       new NavigationIconView(
-        icon: new CustomIcon(),
-        title: 'Box',
+        icon: const Icon(Icons.list),
+        title: 'Whitelist',
         color: Colors.deepOrange,
         vsync: this,
       ),
       new NavigationIconView(
-        icon: const Icon(Icons.cloud),
-        title: 'Cloud',
+        icon: const Icon(Icons.search),
+        title: 'Search',
         color: Colors.teal,
         vsync: this,
       ),
       new NavigationIconView(
-        icon: const Icon(Icons.favorite),
-        title: 'Favorites',
+        icon: const Icon(Icons.input),
+        title: 'Follow',
         color: Colors.indigo,
         vsync: this,
       ),
       new NavigationIconView(
-        icon: const Icon(Icons.event_available),
-        title: 'Event',
+        icon: const Icon(Icons.fast_forward),
+        title: 'Process',
         color: Colors.pink,
         vsync: this,
       )

@@ -41,6 +41,7 @@ class LoginPageState extends State<LoginPage>{
   Future<bool> _testUserLogged() async {
     print("_testUserLogged");
     final FirebaseUser currentUser = await _auth.currentUser();
+    print(currentUser);
     if(currentUser==null)
       return false;
     else
@@ -63,16 +64,6 @@ class LoginPageState extends State<LoginPage>{
     assert(user.uid == currentUser.uid);
     return 'signInWithGoogle succeeded: $user';
   }
-
-  Future<FirebaseUser> _testUserLogged2() async {
-    print("_testUserLogged");
-      final FirebaseUser currentUser = await _auth.currentUser()
-          .then((FirebaseUser user) {
-              print(user);
-              Navigator.of(context).pushNamed("/navigator");
-          });
-  }
-
 
   Future<String> _login(User _data) async {
     final FirebaseUser user = await _auth.signInWithEmailAndPassword(
@@ -106,9 +97,10 @@ class LoginPageState extends State<LoginPage>{
   @override
   void initState() {
     _testUserLogged().then((bool value) {
-      new Future.delayed(Duration.zero, () {
-        Navigator.of(context).pushNamed("/navigator");
-      });
+      if(value)
+        new Future.delayed(Duration.zero, () {
+          Navigator.of(context).pushNamed("/navigator");
+        });
     });
     super.initState();
   }

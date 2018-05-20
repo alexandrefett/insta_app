@@ -15,6 +15,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "8181935955-peojnevhi4ec99e538rjhrv2n2ifeggj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fett.instaapp",
+            "certificate_hash": "dafbebdb7a333416602de7afa984e6176924eae4"
+          }
+        },
+        {
+          "client_id": "8181935955-puqpdmc5j5nma83diqo1kdt0q2b5tfgt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fett.instaapp",
+            "certificate_hash": "f33f29d23e63985d40534bc464234e99805f2d39"
+          }
+        },
+        {
           "client_id": "8181935955-lna78bs2sakfnhu7tr5vq0vkidv3sfoc.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,8 +45,13 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "8181935955-lna78bs2sakfnhu7tr5vq0vkidv3sfoc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2
