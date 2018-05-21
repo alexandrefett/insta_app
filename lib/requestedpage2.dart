@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:insta_app/model';
 import 'package:insta_app/standardresponse.dart';
-
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+/*
 class Requested extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
@@ -18,6 +20,8 @@ class Requested extends StatelessWidget{
     );
   }
 }
+*/
+
 
 class SecondPage extends StatefulWidget {
   @override
@@ -26,13 +30,31 @@ class SecondPage extends StatefulWidget {
 
 class _SecondPage extends State<SecondPage>{
 
+
+  Future<Firestore> connect() async{
+    final FirebaseApp app = await FirebaseApp.configure(
+      name: 'InstaManager',
+      options: const FirebaseOptions(
+        googleAppID: '1:8181935955:android:f442fb586be1c267',
+        gcmSenderID: '8181935955',
+        apiKey: 'AIzaSyBaefpr0jIHFdrIFOYWRCnzmlmIlYZqTlk',
+        projectID: 'instamanager-908a3',
+      ),
+    );
+    firestore = new Firestore(app: app);
+  }
+
+  Firestore firestore;
+
   int _offset = -1 * (new DateTime.now().millisecondsSinceEpoch);
   var cacheddata = new Map<int, Account>();
   var offsetLoaded = new Map<int, bool>();
   int _total = 0;
 
+
   @override
   void initState() {
+    connect();
     _getTotal().then((int total) {
       setState(() {
         _total = total;
@@ -57,13 +79,13 @@ class _SecondPage extends State<SecondPage>{
          }
     );
 
-
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text("Paged"),
-      ),
-      body: listView,
-    );
+    return listView;
+//    return new Scaffold(
+//      appBar: new AppBar(
+//        title: new Text("Paged"),
+//      ),
+//      body: listView,
+//    );
   }
 
 
@@ -82,13 +104,36 @@ class _SecondPage extends State<SecondPage>{
 
   Future<List<Account>> _getRequested(int offset, int limit) async{
     print("loading...:");
-    http.Response response = await http.get("http://192.168.0.25:4567/api/v1/requested?offset=$_offset&limit=20",
-        headers: {
-          "Accept":"application/json"
-        }
-    );
-    print('URL= '+ response.request.url.toString());
-    print(response.body);
+
+    CollectionReference ref = Firestore.instance
+        .collection('users')
+        .document('userid')
+        .collection('requested')
+        .orderBy('date')
+        .startAt([offset])
+        .limit(limit);
+
+    CollectionReference get messages => firestore.collection('messages');
+
+
+
+
+    ApiFuture<QuerySnapshot> query = db.collection("users")
+        .document(userid)
+        .collection("requested").orderBy("date").startAt(offset).limit(limit).get();
+
+    QuerySnapshot querySnapshot = query.get();
+    List<QueryDocumentSnapshot> documents = querySnapshot.getDocuments();
+
+
+
+//    http.Response response = await http.get("http://192.168.0.25:4567/api/v1/requested?offset=$_offset&limit=20",
+//        headers: {
+//          "Accept":"application/json"
+//        }
+//    );
+//    print('URL= '+ response.request.url.toString());
+//    print(response.body);
     Map data = json.decode(response.body);
 
     StandardResponse dataAccount = new StandardResponse.fromJson(data);
