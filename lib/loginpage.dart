@@ -13,8 +13,9 @@ import 'package:firebase_core/firebase_core.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final GoogleSignIn _googleSignIn = new GoogleSignIn();
+Firestore firestore;
 
-Future<void> main() async {
+Future<void> connect() async {
   final FirebaseApp app = await FirebaseApp.configure(
     name: 'InstaManager',
     options: const FirebaseOptions(
@@ -24,13 +25,11 @@ Future<void> main() async {
       projectID: 'instamanager-908a3',
     ),
   );
-  final Firestore firestore = new Firestore(app: app);
 //  void main() => runApp(new MyApp(firestore: firestore));
-  runApp(new MyApp(firestore: firestore));
+//  runApp(new MyApp(firestore: firestore));
 }
 
 class MyApp extends StatelessWidget {
-  MyApp({this.firestore});
 
   final Firestore firestore;
 
@@ -41,10 +40,8 @@ class MyApp extends StatelessWidget {
         theme: new ThemeData(primarySwatch: Colors.blue),
         home: new LoginPage(),
         routes: <String, WidgetBuilder>{
-//          "/second": (BuildContext context) => new Requested(),
           "/registerWithEmail": (BuildContext context) => new RegisterScreen(),
-          "/navigator": (BuildContext context) => new MainPageApp(firestore: firestore)
-
+          "/navigator": (BuildContext context) => new MainPageApp()
         });
   }
 }
@@ -115,12 +112,7 @@ class LoginPageState extends State<LoginPage>{
 
   @override
   void initState() {
-    _testUserLogged().then((bool value) {
-      if(value)
-        new Future.delayed(Duration.zero, () {
-          Navigator.of(context).pushNamed("/navigator");
-        });
-    });
+    connect();
     super.initState();
   }
 
@@ -131,9 +123,7 @@ class LoginPageState extends State<LoginPage>{
       new Column(crossAxisAlignment: CrossAxisAlignment.center, children: <
           Widget>[
         new Padding(padding: const EdgeInsets.only(top: 40.0)),
-        new FlutterLogo(
-          size: 100.0,
-        ),
+        new FlutterLogo( size: 100.0 ),
         new Form(
             child: new Theme(
                 data: new ThemeData(

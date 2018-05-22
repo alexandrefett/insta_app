@@ -4,10 +4,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MainPageApp extends StatelessWidget {
-  MainPageApp({this.firestore});
-
-  final Firestore firestore;
-
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
@@ -39,13 +35,16 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
+        appBar: new AppBar(
+          title: new Text("InstaManager"),
+          centerTitle: true,
+        ),
         body: new PageView(
             children: [
               new SecondPage(),//Container(color: Colors.red),
               new Container(color: Colors.blue),
               new Container(color: Colors.grey)
             ],
-
             /// Specify the page controller
             controller: _pageController,
             onPageChanged: onPageChanged

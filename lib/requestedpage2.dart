@@ -6,22 +6,6 @@ import 'package:insta_app/model';
 import 'package:insta_app/standardresponse.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-/*
-class Requested extends StatelessWidget{
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    return new MaterialApp(
-        title: 'Requested',
-        theme: new ThemeData(
-            primarySwatch: Colors.blue
-        ),
-        home: new SecondPage()
-    );
-  }
-}
-*/
-
 
 class SecondPage extends StatefulWidget {
   @override
@@ -30,6 +14,7 @@ class SecondPage extends StatefulWidget {
 
 class _SecondPage extends State<SecondPage>{
 
+  Firestore firestore;
 
   Future<Firestore> connect() async{
     final FirebaseApp app = await FirebaseApp.configure(
@@ -44,7 +29,6 @@ class _SecondPage extends State<SecondPage>{
     firestore = new Firestore(app: app);
   }
 
-  Firestore firestore;
 
   int _offset = -1 * (new DateTime.now().millisecondsSinceEpoch);
   var cacheddata = new Map<int, Account>();
@@ -65,6 +49,28 @@ class _SecondPage extends State<SecondPage>{
 
   @override
   Widget build(BuildContext context) {
+    print(firestore.app.name);
+    return new StreamBuilder<QuerySnapshot>(
+      stream: firestore
+          .collection('users')
+          .document('3472751680')
+          .collection('requested')
+          .orderBy('date').snapshots(),
+      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        if (!snapshot.hasData) return new Text('Loading...');
+        return new ListView(
+          children: snapshot.data.documents.map((DocumentSnapshot document) {
+            return new ListTile(
+              title: new Text(document['username']),
+              subtitle: new Text(document['fullName']),
+            );
+          }).toList(),
+        );
+      },
+    );
+
+
+/*
     var listView = new ListView.builder(
         itemCount: _total,
         itemBuilder: (BuildContext context, int index) {
@@ -80,6 +86,7 @@ class _SecondPage extends State<SecondPage>{
     );
 
     return listView;
+    */
 //    return new Scaffold(
 //      appBar: new AppBar(
 //        title: new Text("Paged"),
@@ -113,27 +120,13 @@ class _SecondPage extends State<SecondPage>{
         .startAt([offset])
         .limit(limit);
 
-    CollectionReference get messages => firestore.collection('messages');
-
-
-
-
-    ApiFuture<QuerySnapshot> query = db.collection("users")
-        .document(userid)
-        .collection("requested").orderBy("date").startAt(offset).limit(limit).get();
-
-    QuerySnapshot querySnapshot = query.get();
-    List<QueryDocumentSnapshot> documents = querySnapshot.getDocuments();
-
-
-
-//    http.Response response = await http.get("http://192.168.0.25:4567/api/v1/requested?offset=$_offset&limit=20",
-//        headers: {
-//          "Accept":"application/json"
-//        }
-//    );
-//    print('URL= '+ response.request.url.toString());
-//    print(response.body);
+    http.Response response = await http.get("http://192.168.0.25:4567/api/v1/requested?offset=$_offset&limit=20",
+        headers: {
+          "Accept":"application/json"
+        }
+    );
+    print('URL= '+ response.request.url.toString());
+    print(response.body);
     Map data = json.decode(response.body);
 
     StandardResponse dataAccount = new StandardResponse.fromJson(data);
