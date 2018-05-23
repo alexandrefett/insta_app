@@ -22,14 +22,8 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
 
-  /// This controller can be used to programmatically
-  /// set the current displayed page
+  SecondPage secondPage = new SecondPage();
   PageController _pageController;
-
-  /// Indicating the current displayed page
-  /// 0: trends
-  /// 1: feed
-  /// 2: community
   int _page = 0;
 
   @override
@@ -39,29 +33,45 @@ class _MainPageState extends State<MainPage> {
           title: new Text("InstaManager"),
           centerTitle: true,
         ),
-        body: new PageView(
+        body:
+        new PageView(
             children: [
-              new SecondPage(),//Container(color: Colors.red),
-              new Container(color: Colors.blue),
-              new Container(color: Colors.grey)
+              new Container(
+                key: new PageStorageKey('Profile'),
+                child: secondPage,//Container(color: Colors.red),
+              ),
+              new Container(
+                color: Colors.blue,
+                key: new PageStorageKey('Search')
+              ),
+              new Container(
+                  color: Colors.grey,
+                  key: new PageStorageKey('List')
+              ),
+              new Container(
+                  color: Colors.yellow,
+                  key: new PageStorageKey('Follow'))
             ],
             /// Specify the page controller
             controller: _pageController,
             onPageChanged: onPageChanged
         ),
         bottomNavigationBar: new BottomNavigationBar(
-            items: [
-              new BottomNavigationBarItem(
-                  icon: new Icon(Icons.add),
-                  title: new Text("trends")
+            items: [ new BottomNavigationBarItem(
+                    icon: new Icon(Icons.account_circle, color: Colors.black54),
+                    title: new Text("Profile")
               ),
               new BottomNavigationBarItem(
-                  icon: new Icon(Icons.location_on),
-                  title: new Text("feed")
+                  icon: new Icon(Icons.search, color: Colors.black54),
+                  title: new Text("Search")
               ),
               new BottomNavigationBarItem(
-                  icon: new Icon(Icons.people),
-                  title: new Text("community")
+                  icon: new Icon(Icons.list, color: Colors.black54),
+                  title: new Text("Lists")
+              ),
+              new BottomNavigationBarItem(
+                  icon: new Icon(Icons.group, color: Colors.black54),
+                  title: new Text("Follow"),
               )
             ],
 
@@ -83,7 +93,8 @@ class _MainPageState extends State<MainPage> {
     _pageController.animateToPage(
         page,
         duration: const Duration(milliseconds: 300),
-        curve: Curves.ease
+        curve: Curves.ease,
+
     );
   }
 
@@ -97,7 +108,7 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
-    _pageController = new PageController();
+    _pageController = new PageController(keepPage:true);
   }
 
   @override

@@ -12,7 +12,7 @@ class SecondPage extends StatefulWidget {
   _SecondPage createState() => _SecondPage();
 }
 
-class _SecondPage extends State<SecondPage>{
+class _SecondPage extends State<SecondPage> with AutomaticKeepAliveClientMixin<SecondPage>{
 
   Firestore firestore;
 
@@ -26,7 +26,7 @@ class _SecondPage extends State<SecondPage>{
         projectID: 'instamanager-908a3',
       ),
     );
-    firestore = new Firestore(app: app);
+    return new Firestore(app: app);
   }
 
 
@@ -38,7 +38,9 @@ class _SecondPage extends State<SecondPage>{
 
   @override
   void initState() {
-    connect();
+    connect().then((Firestore firestore){
+      this.firestore = firestore;
+    });
     _getTotal().then((int total) {
       setState(() {
         _total = total;
@@ -49,8 +51,8 @@ class _SecondPage extends State<SecondPage>{
 
   @override
   Widget build(BuildContext context) {
-    print(firestore.app.name);
     return new StreamBuilder<QuerySnapshot>(
+      key: new PageStorageKey('List'),
       stream: firestore
           .collection('users')
           .document('3472751680')
@@ -68,33 +70,7 @@ class _SecondPage extends State<SecondPage>{
         );
       },
     );
-
-
-/*
-    var listView = new ListView.builder(
-        itemCount: _total,
-        itemBuilder: (BuildContext context, int index) {
-          Account data = _getData(index);
-             return new ListTile(
-              title: new Text(data.fullName),
-              //leading: new CircleAvatar(
-              //  backgroundImage: new NetworkImage(data.profilePictureUrl),
-              //),
-              subtitle: new Text(data.username),
-            );
-         }
-    );
-
-    return listView;
-    */
-//    return new Scaffold(
-//      appBar: new AppBar(
-//        title: new Text("Paged"),
-//      ),
-//      body: listView,
-//    );
   }
-
 
   Future<int> _getTotal() async {
     return 1;
@@ -163,5 +139,9 @@ class _SecondPage extends State<SecondPage>{
     }
     return data;
   }
+
+  // TODO: implement wantKeepAlive
+  @override
+  bool get wantKeepAlive => true;
 }
 

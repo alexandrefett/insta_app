@@ -78,6 +78,11 @@ class LoginPageState extends State<LoginPage>{
 
     final FirebaseUser currentUser = await _auth.currentUser();
     assert(user.uid == currentUser.uid);
+    if(user.uid == currentUser.uid)
+      Navigator.pushReplacement(context,
+          new MaterialPageRoute(builder: (BuildContext context) =>  new MainPageApp()));
+    else
+      _showAlertLogin('Erro:');
     return 'signInWithGoogle succeeded: $user';
   }
 
@@ -119,8 +124,7 @@ class LoginPageState extends State<LoginPage>{
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-        body: new Stack(fit: StackFit.expand, children: <Widget>[
-      new Column(crossAxisAlignment: CrossAxisAlignment.center, children: <
+        body: new Column(crossAxisAlignment: CrossAxisAlignment.center, children: <
           Widget>[
         new Padding(padding: const EdgeInsets.only(top: 40.0)),
         new FlutterLogo( size: 100.0 ),
@@ -188,7 +192,6 @@ class LoginPageState extends State<LoginPage>{
                   ]),
                 )))
       ])
-    ])
     );
   }
 }

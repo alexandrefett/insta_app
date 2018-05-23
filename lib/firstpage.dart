@@ -11,7 +11,7 @@ import 'package:firebase_core/firebase_core.dart';
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final CircularProgressIndicator progress = new CircularProgressIndicator();
 
-
+/*
 Future<void> main() async {
   final FirebaseApp app = await FirebaseApp.configure(
     name: 'InstaManager',
@@ -23,9 +23,13 @@ Future<void> main() async {
     ),
   );
   final Firestore firestore = new Firestore(app: app);
+
 //  void main() => runApp(new MyApp(firestore: firestore));
   runApp(new MyApp(firestore: firestore));
 }
+*/
+
+void main() => runApp(new MyApp());
 
 class MyApp extends StatelessWidget {
   MyApp({this.firestore});
@@ -81,7 +85,7 @@ class FirstPageState extends State<FirstPage>{
   Widget build(BuildContext context) {
     return new Scaffold(
         body: new Center(
-          child:new Stack(
+          child:new Column(
             children: <Widget>[
               new Column(
                 crossAxisAlignment: CrossAxisAlignment.center, children: <Widget>[
