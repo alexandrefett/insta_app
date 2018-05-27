@@ -37,20 +37,16 @@ class _MainPageState extends State<MainPage> {
         new PageView(
             children: [
               new Container(
-                key: new PageStorageKey('Profile'),
                 child: secondPage,//Container(color: Colors.red),
               ),
               new Container(
                 color: Colors.blue,
-                key: new PageStorageKey('Search')
               ),
               new Container(
                   color: Colors.grey,
-                  key: new PageStorageKey('List')
               ),
               new Container(
                   color: Colors.yellow,
-                  key: new PageStorageKey('Follow'))
             ],
             /// Specify the page controller
             controller: _pageController,

@@ -7,7 +7,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:insta_app/mainpage.dart';
 import 'package:insta_app/user.dart';
 import 'register.dart';
-import 'navigator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 

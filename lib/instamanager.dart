@@ -8,12 +8,13 @@ class InstaManager {
   static final InstaManager _instamanager = new InstaManager._internal();
 
   static const SERVER = 'http://192.168.0.18/api/v1/{{method}}';
-  static const GET_PROFILE = '/profile/{{token}}';
+  static const GET_PROFILE = '/profile';
   static const POST_PROFILE = '/register';
 
   factory InstaManager() {
     return _instamanager;
   }
+
   InstaManager._internal();
 
   String _getMethod(String method){
@@ -21,8 +22,8 @@ class InstaManager {
   }
 
   Future<User> _getProfile(String token) async {
+
     String url = _getMethod(GET_PROFILE);
-    url.replaceAll('{{token}}', token);
     print(url);
     http.Response response = await http.get(url,
         headers: {"Accept": "application/json"});
