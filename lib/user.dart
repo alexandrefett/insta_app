@@ -1,19 +1,18 @@
 class User{
-  String id;
-  String instagram;
-  String instaPassword;
-  String email;
   String password;
-  String name;
-  User({this.id, this.instagram, this.instaPassword, this.email, this.password, this.name});
+  String username;
+  User({this.password, this.username});
 
   factory User.fromJson(Map<String, dynamic> json){
     return new User(
-        id: json['id'],
-        instagram: json['instagram'],
-        instaPassword: json['instaPassword'],
-        email: json['email'],
-        name: json['name'],
+        username: json['username'],
         password: json['password']);
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'username': username,
+      'password': password
+    };
   }
 }

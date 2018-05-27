@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:insta_app/profilepage.dart';
 import 'package:insta_app/requestedpage2.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:insta_app/whitelistpage.dart';
 
 class MainPageApp extends StatelessWidget {
   @override
@@ -37,16 +39,17 @@ class _MainPageState extends State<MainPage> {
         new PageView(
             children: [
               new Container(
-                child: secondPage,//Container(color: Colors.red),
+                child: new ProfilePage(),
               ),
               new Container(
-                color: Colors.blue,
+                child: new WhiteListPage(),
               ),
               new Container(
-                  color: Colors.grey,
+                child: new SecondPage(),
               ),
               new Container(
                   color: Colors.yellow,
+              )
             ],
             /// Specify the page controller
             controller: _pageController,
@@ -55,15 +58,15 @@ class _MainPageState extends State<MainPage> {
         bottomNavigationBar: new BottomNavigationBar(
             items: [ new BottomNavigationBarItem(
                     icon: new Icon(Icons.account_circle, color: Colors.black54),
-                    title: new Text("Profile")
+                    title: new Text("Profile", style: new TextStyle(color: Colors.black54))
               ),
               new BottomNavigationBarItem(
                   icon: new Icon(Icons.search, color: Colors.black54),
-                  title: new Text("Search")
+                  title: new Text("Search", style: new TextStyle(color: Colors.black54))
               ),
               new BottomNavigationBarItem(
                   icon: new Icon(Icons.list, color: Colors.black54),
-                  title: new Text("Lists")
+                  title: new Text("Lists", style: new TextStyle(color: Colors.black54))
               ),
               new BottomNavigationBarItem(
                   icon: new Icon(Icons.group, color: Colors.black54),

@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:async';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:insta_app/model';
@@ -8,18 +7,14 @@ import 'package:insta_app/standardresponse.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-final FirebaseAuth _auth = FirebaseAuth.instance;
-
-
-class WhiteListPage extends StatefulWidget {
+class SearchPage extends StatefulWidget {
   @override
-  _WhiteListPage createState() => _WhiteListPage();
+  _SearchPage createState() => _SearchPage();
 }
 
-class _WhiteListPage extends State<WhiteListPage> with AutomaticKeepAliveClientMixin<WhiteListPage>{
+class _SearchPage extends State<SearchPage> with AutomaticKeepAliveClientMixin<SearchPage>{
 
   Firestore firestore;
-  var uid;
 
   Future<Firestore> connect() async{
     final FirebaseApp app = await FirebaseApp.configure(
@@ -35,37 +30,61 @@ class _WhiteListPage extends State<WhiteListPage> with AutomaticKeepAliveClientM
   }
 
 
+  StreamBuilder<QuerySnapshot> stream(String username){
+    return new StreamBuilder<QuerySnapshot>();
+  }
+
   @override
   void initState() {
     connect().then((Firestore firestore){
       this.firestore = firestore;
     });
-    uid = _auth.currentUser().then((FirebaseUser user)=> uid = user.uid);
     super.initState();
   }
+
 
   @override
   Widget build(BuildContext context) {
     return new StreamBuilder<QuerySnapshot>(
       stream: firestore
           .collection('users')
-          .document(uid)
-          .collection('whitelist')
+          .document('3472751680')
+          .collection('requested')
           .orderBy('date').snapshots(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (!snapshot.hasData) return new Text('Loading...');
         return new ListView(
           children: snapshot.data.documents.map((DocumentSnapshot document) {
             return new ListTile(
-              leading: new CircleAvatar(child: new Image.network(document['profilePictureUrl'])),
               title: new Text(document['username']),
               subtitle: new Text(document['fullName']),
-              trailing: new FlatButton(onPressed: (){}, child: new Text('Remover')),
             );
           }).toList(),
         );
       },
     );
+  }
+
+  Future<List<Account>> _getSearch(String search) async{
+    print("loading...:");
+
+    http.Response response = await http.get("http://192.168.0.25:8080/api/v1/search?query=$search",
+        headers: {
+          "Accept":"application/json"
+        }
+    );
+    print('URL= '+ response.request.url.toString());
+    print(response.body);
+    Map data = json.decode(response.body);
+    List list = data as List;
+
+      setState((){
+        _offset = datas.elementAt(datas.length-1).date+1;
+        print("offset:$_offset");
+//        _total += datas.length;
+      });
+      return datas;
+    }
   }
 
   // TODO: implement wantKeepAlive

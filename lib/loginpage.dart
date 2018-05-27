@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
 
   final Firestore firestore;
 
+
   @override
   Widget build(BuildContext context) {
       return new MaterialApp(
@@ -51,7 +52,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class LoginPageState extends State<LoginPage>{
-  User _data = new User();
+  var email;
+  var password;
 
   Future<bool> _testUserLogged() async {
     print("_testUserLogged");
@@ -85,9 +87,9 @@ class LoginPageState extends State<LoginPage>{
     return 'signInWithGoogle succeeded: $user';
   }
 
-  Future<String> _login(User _data) async {
+  Future<String> _authentition(String email, String password) async {
     final FirebaseUser user = await _auth.signInWithEmailAndPassword(
-        email: _data.email, password: _data.password);
+        email: email, password: password);
     if (user != null) {
       print(user.email);
       print(user.displayName);
@@ -96,7 +98,7 @@ class LoginPageState extends State<LoginPage>{
   }
 
   void submit() {
-    _login(this._data);
+    _authentition(email, password);
   }
 
   void _showAlertLogin(String value) {
@@ -142,14 +144,14 @@ class LoginPageState extends State<LoginPage>{
                         decoration: new InputDecoration(labelText: "Email"),
                         keyboardType: TextInputType.emailAddress,
                         onChanged: (String value) {
-                          this._data.email = value;
+                          this.email = value;
                         }),
                     new TextField(
                         decoration: new InputDecoration(labelText: "Password"),
                         keyboardType: TextInputType.text,
                         obscureText: true,
                         onChanged: (String value) {
-                          this._data.password = value;
+                          this.password = value;
                         }),
                     new Padding(padding: const EdgeInsets.only(top: 20.0)),
                     new MaterialButton(
