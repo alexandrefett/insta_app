@@ -3,8 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:insta_app/model';
-import 'package:insta_app/standardresponse.dart';
+import 'package:insta_app/models.dart';
 
 class Requested2 extends StatelessWidget{
   @override

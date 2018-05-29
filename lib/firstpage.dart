@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:insta_app/loginpage.dart';
 import 'package:insta_app/mainpage.dart';
-import 'package:insta_app/user.dart';
+import 'package:insta_app/models.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 

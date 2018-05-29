@@ -2,43 +2,16 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:insta_app/standardresponse.dart';
+import 'package:insta_app/models.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:insta_app/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
-var _user = new User();
-
-_saveInstagramData(User user) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.setString('username', user.username);
-  await prefs.setString('password', user.password);
-}
-
-Future<User> _getInstagramData() async{
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  String username = await prefs.get('username');
-  String password = await prefs.get('password');
-  return new User(username: username, password: password);
-}
-
-Future<StandardResponse> _login(User user) async {
-  print("login...");
-  Map map = user.toMap();
-  String data = json.encode(map);
-
-  http.Response response = await http.post("http://192.168.0.25:8080/api/v1/login",
-      headers: {
-        "Accept":"application/json",
-        "Content-type":"application/json"
-      },
-      body: data
-  );
-}
+var _user;
+var _account;
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -47,6 +20,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePage extends State<ProfilePage> {
   Firestore firestore;
+  bool _isAccount = false;
 
   Future<Firestore> connect() async {
     final FirebaseApp app = await FirebaseApp.configure(
@@ -97,8 +71,35 @@ class _ProfilePage extends State<ProfilePage> {
                 ]))));
   }
 
+  Widget _profile(Account account) {
+    return new Container(
+                padding: const EdgeInsets.all(40.0),
+                child: new Column(children: <Widget>[
+                  new CircleAvatar(backgroundImage: new NetworkImage(account.profilePictureUrl)),
+                    new Text(account.username),
+                    new Text(account.fullName)
+
+                ]));
+  }
+
   @override
   void initState() {
+    _user = _getInstagramData().then((User user){
+      _user = user;
+      print(user);
+      _login(user).then((StandardResponse res){
+        print(res);
+        if(res.status=="SUCCESS") {
+          _getAccount(user).then((StandardResponse acc){
+            print(acc);
+            if(acc.status=="SUCCESS"){
+              _isAccount = true;
+              _account = Account.fromJson(acc.data);
+            }
+          });
+        }
+      });
+    });
     _getInstagramData().then((User user){_user = user;});
     if(_user.username != null && _user.password != null){
       _login(_user);
@@ -111,6 +112,63 @@ class _ProfilePage extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return new Container();
+    return _isAccount ? _form() : _profile(_account);
   }
+
+  _saveInstagramData(User user) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('username', user.username);
+    await prefs.setString('password', user.password);
+    setState() {
+      _login(user).then((StandardResponse res) {
+        print(res);
+        if (res.status == "SUCCESS") {
+          _getAccount(user).then((StandardResponse acc) {
+            print(acc);
+            if (acc.status == "SUCCESS") {
+              _isAccount = true;
+              _account = Account.fromJson(acc.data);
+            }
+          });
+        }
+      });
+    }
+  }
+
+  Future<User> _getInstagramData() async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String username = await prefs.get('username');
+    String password = await prefs.get('password');
+    return new User(username: username, password: password);
+  }
+
+  Future<StandardResponse> _login(User user) async {
+    print("login...");
+    Map map = user.toMap();
+    String data = json.encode(map);
+
+    http.Response response = await http.post("http://192.168.0.18:8080/api/v1/login",
+        headers: {
+          "Accept":"application/json",
+          "Content-type":"application/json"
+        },
+        body: data
+    );
+    Map body = json.decode(response.body);
+    return new StandardResponse.fromJson(body);
+  }
+
+  Future<StandardResponse> _getAccount(User user) async {
+    print("getAcount...");
+    Map map = user.toMap();
+    String data = json.encode(map);
+
+    http.Response response = await http.get("http://192.168.0.18:8080/api/v1/account?username=${user.username}",
+        headers: {
+          "Accept":"application/json",
+          "Content-type":"application/json"
+        }
+    );
+  }
+
 }

@@ -1,4 +1,4 @@
-import 'user.dart';
+import 'package:insta_app/models.dart';
 class Singleton {
   static final Singleton _singleton = new Singleton._internal();
 

@@ -2,18 +2,21 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:insta_app/user.dart';
+import 'package:insta_app/models.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
 Future _updateUserInfo(User _data) async {
   final UserUpdateInfo userUpdateInfo = new UserUpdateInfo();
-  userUpdateInfo.displayName = _data.name;
+  userUpdateInfo.displayName = _data.username;
   await _auth.updateProfile(userUpdateInfo);
 }
 
 User _data = new User();
+var email;
+var password;
+var name;
 
 class RegisterScreen extends StatelessWidget {
   @override
@@ -38,7 +41,7 @@ class _RegisterPage extends State<RegisterPage> {
   Future _registerWithEmail() async {
     try {
       final FirebaseUser user = await _auth.createUserWithEmailAndPassword(
-          email: _data.email, password: _data.name)
+          email: email, password: password)
           .then((onValue) {
         _updateUserInfo(_data);
       });
@@ -92,21 +95,21 @@ class _RegisterPage extends State<RegisterPage> {
                         keyboardType: TextInputType.text,
                         obscureText: true,
                         onChanged: (String value) {
-                          this._data.name = value;
+                          name = value;
                         }),
                     new TextField(
                         decoration: new InputDecoration(labelText: "Email"),
                         keyboardType: TextInputType.text,
                         obscureText: true,
                         onChanged: (String value) {
-                          this._data.email = value;
+                          email = value;
                         }),
                     new TextField(
                         decoration: new InputDecoration(labelText: "Password"),
                         keyboardType: TextInputType.text,
                         obscureText: true,
                         onChanged: (String value) {
-                          this._data.password = value;
+                          password = value;
                         }),
                     new Padding(padding: const EdgeInsets.only(top: 20.0)),
                     new MaterialButton(
