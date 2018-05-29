@@ -6,12 +6,10 @@ import 'package:insta_app/models.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
+final Firestore _db = Firestore.instance;
 
-var _user;
-var _account;
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -19,23 +17,19 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePage extends State<ProfilePage> {
-  Firestore firestore;
-  bool _isAccount = false;
+  bool _isLoading = true;
+  bool _isLogin = false;
+  bool _isProfile = false;
 
-  Future<Firestore> connect() async {
-    final FirebaseApp app = await FirebaseApp.configure(
-      name: 'InstaManager',
-      options: const FirebaseOptions(
-        googleAppID: '1:8181935955:android:f442fb586be1c267',
-        gcmSenderID: '8181935955',
-        apiKey: 'AIzaSyBaefpr0jIHFdrIFOYWRCnzmlmIlYZqTlk',
-        projectID: 'instamanager-908a3',
-      ),
-    );
-    return new Firestore(app: app);
+  Profile _profile = new Profile();
+  Account _account = new Account();
+
+  Widget _buildProgress(){
+    return new Center(
+        child: new CircularProgressIndicator());
   }
 
-  Widget _form() {
+  Widget _buildForm() {
     return new Form(
         child: new Theme(
             data: new ThemeData(
@@ -51,124 +45,139 @@ class _ProfilePage extends State<ProfilePage> {
                       decoration: new InputDecoration(labelText: "instagram"),
                       keyboardType: TextInputType.emailAddress,
                       onChanged: (String value) {
-                          _user.username = value;
+                          this._profile.username = value;
                       }),
                   new TextField(
                       decoration: new InputDecoration(labelText: "password"),
                       keyboardType: TextInputType.text,
                       obscureText: true,
                       onChanged: (String value) {
-                        _user.password = value;
+                        this._profile.password = value;
                       }),
                   new Padding(padding: const EdgeInsets.only(top: 20.0)),
                   new MaterialButton(
                     color: Colors.blueAccent,
                     textColor: Colors.white,
                     child: new Text("save"),
-                    onPressed: _saveInstagramData(_user),
+                    onPressed: _saveProfile,
                     minWidth: 200.0,
                   ),
                 ]))));
   }
 
-  Widget _profile(Account account) {
+  Widget _buildProfile(Account account) {
     return new Container(
                 padding: const EdgeInsets.all(40.0),
                 child: new Column(children: <Widget>[
                   new CircleAvatar(backgroundImage: new NetworkImage(account.profilePictureUrl)),
                     new Text(account.username),
                     new Text(account.fullName)
-
                 ]));
   }
 
   @override
   void initState() {
-    _user = _getInstagramData().then((User user){
-      _user = user;
-      print(user);
-      _login(user).then((StandardResponse res){
-        print(res);
-        if(res.status=="SUCCESS") {
-          _getAccount(user).then((StandardResponse acc){
-            print(acc);
-            if(acc.status=="SUCCESS"){
-              _isAccount = true;
-              _account = Account.fromJson(acc.data);
-            }
-          });
-        }
-      });
-    });
-    _getInstagramData().then((User user){_user = user;});
-    if(_user.username != null && _user.password != null){
-      _login(_user);
-    }
-//    connect().then((Firestore firestore) {
-//      this.firestore = firestore;
-//    });
+    _login();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return _isAccount ? _form() : _profile(_account);
+    if(_isLoading)
+      return _buildProgress();
+    else
+      if(!_isProfile)
+        return _buildForm();
+      if(_isLogin)
+        return _buildProfile(_account);
   }
 
-  _saveInstagramData(User user) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('username', user.username);
-    await prefs.setString('password', user.password);
-    setState() {
-      _login(user).then((StandardResponse res) {
-        print(res);
-        if (res.status == "SUCCESS") {
-          _getAccount(user).then((StandardResponse acc) {
-            print(acc);
-            if (acc.status == "SUCCESS") {
-              _isAccount = true;
-              _account = Account.fromJson(acc.data);
+  Future<Account> _login(){
+    _auth.currentUser().then((user){
+      print('--------------auth user');
+      print(user);
+        this._profile.uid = user.uid;
+        _getProfile(user.uid).then((profile){
+          print('--------------profile');
+            print(profile);
+            if(profile==null){
+              setState(() {
+                _isProfile = false;
+                _isLogin = false;
+                _isLogin = false;
+              });
+              return null;
             }
-          });
-        }
+            else{
+              _getLogin(profile).then((response){
+                print('--------------account');
+                  print(response);
+                  if(response.status=="SUCCESS"){
+                      _account = Account.fromJson(response.data);
+                      setState(() {
+                      _isProfile = true;
+                      _isLogin = true;
+                      _isLoading = false;
+                    });
+                  }
+                  else{
+                    setState(() {
+                      _isProfile = true;
+                      _isLogin = false;
+                      _isLoading = false;
+                    });
+                  }
+              });
+            }
       });
-    }
+    });
+
   }
 
-  Future<User> _getInstagramData() async{
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String username = await prefs.get('username');
-    String password = await prefs.get('password');
-    return new User(username: username, password: password);
+  Future<Profile> _getProfile(String uid) async {
+    var profile;
+    print('--------------1');
+
+    DocumentReference doc =
+    Firestore.instance.collection('profile').document(uid);
+    print('--------------2');
+
+    doc.get().then((onValue) {
+      print('--------------3');
+      print(onValue);
+      if (onValue.exists) {
+        print('--------------4');
+        profile = Profile.fromJson(onValue.data);
+        return profile;
+      }
+    });
   }
 
-  Future<StandardResponse> _login(User user) async {
-    print("login...");
+  Future<StandardResponse> _getLogin(Profile user) async {
+    print("_login...$user");
     Map map = user.toMap();
     String data = json.encode(map);
-
-    http.Response response = await http.post("http://192.168.0.18:8080/api/v1/login",
+    var url = Endpoint.LOGIN;
+    http.Response response = await http.post(url,
         headers: {
-          "Accept":"application/json",
-          "Content-type":"application/json"
+          "Accept": "application/json",
+          "Content-type": "application/json"
         },
-        body: data
-    );
+        body: data);
     Map body = json.decode(response.body);
     return new StandardResponse.fromJson(body);
   }
 
-  Future<StandardResponse> _getAccount(User user) async {
-    print("getAcount...");
-    Map map = user.toMap();
-    String data = json.encode(map);
-
-    http.Response response = await http.get("http://192.168.0.18:8080/api/v1/account?username=${user.username}",
-        headers: {
-          "Accept":"application/json",
-          "Content-type":"application/json"
-        }
-    );
+  Future<StandardResponse> _saveProfile(){
+    setState(() {
+      _isLoading = true;
+    });
+    Firestore.instance
+        .collection('profile')
+        .document(_profile.uid)
+        .setData(_profile.toMap()).then((value){
+          _login();
+    });
   }
 
 }

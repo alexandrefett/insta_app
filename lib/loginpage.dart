@@ -9,21 +9,6 @@ import 'package:firebase_core/firebase_core.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final GoogleSignIn _googleSignIn = new GoogleSignIn();
-Firestore firestore;
-
-Future<void> connect() async {
-  final FirebaseApp app = await FirebaseApp.configure(
-    name: 'InstaManager',
-    options: const FirebaseOptions(
-      googleAppID: '1:8181935955:android:f442fb586be1c267',
-      gcmSenderID: '8181935955',
-      apiKey: 'AIzaSyBaefpr0jIHFdrIFOYWRCnzmlmIlYZqTlk',
-      projectID: 'instamanager-908a3',
-    ),
-  );
-//  void main() => runApp(new MyApp(firestore: firestore));
-//  runApp(new MyApp(firestore: firestore));
-}
 
 class MyApp extends StatelessWidget {
 
@@ -50,16 +35,6 @@ class LoginPage extends StatefulWidget {
 class LoginPageState extends State<LoginPage>{
   var email;
   var password;
-
-  Future<bool> _testUserLogged() async {
-    print("_testUserLogged");
-    final FirebaseUser currentUser = await _auth.currentUser();
-    print(currentUser);
-    if(currentUser==null)
-      return false;
-    else
-      return true;
-  }
 
   Future<String> _registerWithGoogle() async {
     final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
@@ -114,7 +89,6 @@ class LoginPageState extends State<LoginPage>{
 
   @override
   void initState() {
-    connect();
     super.initState();
   }
 

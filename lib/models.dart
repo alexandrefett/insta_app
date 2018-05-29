@@ -1,3 +1,11 @@
+class Endpoint{
+
+    static const DOMAIN_V1 = 'http://10.125.121.64:8080/api/v1';
+    static const LOGIN = '/login';
+    static const GET_ACCOUNT = '/account';
+    static const GET_PROFILE = '/profile';
+}
+
 class Account {
   int id;
   String username;
@@ -44,20 +52,27 @@ class Account {
   }
 }
 
-class User{
+class Profile{
+  String uid;
   String password;
   String username;
-  User({this.password, this.username});
+  var plan;
 
-  factory User.fromJson(Map<String, dynamic> json){
-    return new User(
+  Profile({this.uid, this.password, this.username, this.plan});
+
+  factory Profile.fromJson(Map<String, dynamic> json){
+    return new Profile(
+        uid: json['uid'],
         username: json['username'],
+        plan: json['plan'],
         password: json['password']);
   }
 
   Map<String, dynamic> toMap() {
     return {
+      'uid': uid,
       'username': username,
+      'plan': plan,
       'password': password
     };
   }
@@ -83,4 +98,8 @@ class StandardResponse {
       'data': data
     };
   }
+}
+
+enum Plan {
+  FREE, LIGHT, TOP
 }

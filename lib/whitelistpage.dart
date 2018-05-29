@@ -8,7 +8,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
-
+final Firestore _db = Firestore.instance;
 
 class WhiteListPage extends StatefulWidget {
   @override
@@ -16,39 +16,27 @@ class WhiteListPage extends StatefulWidget {
 }
 
 class _WhiteListPage extends State<WhiteListPage> with AutomaticKeepAliveClientMixin<WhiteListPage>{
+  FirebaseUser _user = null;
 
-  Firestore firestore;
-  var uid;
-
-  Future<Firestore> connect() async{
-    final FirebaseApp app = await FirebaseApp.configure(
-      name: 'InstaManager',
-      options: const FirebaseOptions(
-        googleAppID: '1:8181935955:android:f442fb586be1c267',
-        gcmSenderID: '8181935955',
-        apiKey: 'AIzaSyBaefpr0jIHFdrIFOYWRCnzmlmIlYZqTlk',
-        projectID: 'instamanager-908a3',
-      ),
-    );
-    return new Firestore(app: app);
+  Widget _buildProgress(){
+    return new Center(
+        child: new CircularProgressIndicator());
   }
-
 
   @override
   void initState() {
-    connect().then((Firestore firestore){
-      this.firestore = firestore;
-    });
-    uid = _auth.currentUser().then((FirebaseUser user)=> uid = user.uid);
+   _auth.currentUser().then((user){
+     _user = user;
+   } );
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return new StreamBuilder<QuerySnapshot>(
-      stream: firestore
+      stream: Firestore.instance
           .collection('users')
-          .document(uid)
+          .document(_user.uid)
           .collection('whitelist')
           .orderBy('date').snapshots(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {

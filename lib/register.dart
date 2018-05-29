@@ -7,17 +7,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
-Future _updateUserInfo(User _data) async {
-  final UserUpdateInfo userUpdateInfo = new UserUpdateInfo();
-  userUpdateInfo.displayName = _data.username;
-  await _auth.updateProfile(userUpdateInfo);
-}
-
-User _data = new User();
-var email;
-var password;
-var name;
-
 class RegisterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -35,15 +24,22 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPage extends State<RegisterPage> {
-  User _data = new User();
+  var email;
+  var password;
+  var name;
 
+  Future _updateUserInfo(String name) async {
+    final UserUpdateInfo userUpdateInfo = new UserUpdateInfo();
+    userUpdateInfo.displayName = name;
+    await _auth.updateProfile(userUpdateInfo);
+  }
 
   Future _registerWithEmail() async {
     try {
       final FirebaseUser user = await _auth.createUserWithEmailAndPassword(
           email: email, password: password)
           .then((onValue) {
-        _updateUserInfo(_data);
+            _updateUserInfo(name);
       });
       final FirebaseUser currentUser = await _auth.currentUser();
       print(currentUser);
