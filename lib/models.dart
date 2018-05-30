@@ -1,40 +1,41 @@
 class Endpoint{
-
-    static const DOMAIN_V1 = 'http://10.125.121.64:8080/api/v1';
-    static const LOGIN = '/login';
-    static const GET_ACCOUNT = '/account';
-    static const GET_PROFILE = '/profile';
+    static const DOMAIN_V1 = 'http://192.168.0.18:8080/api/v1';
+    static const LOGIN = DOMAIN_V1 + '/login';
+    static const GET_ACCOUNT = DOMAIN_V1 + '/account';
+    static const GET_PROFILE = DOMAIN_V1 + '/profile';
 }
 
-class Account {
+class MiniAccount {
   int id;
   String username;
   String fullName;
   bool isVerified;
   bool followedByViewer;
   bool followsViewer;
-  String profilePictureUrl;
+  String profilePicUrl;
+  String profilePicUrlHd;
   bool requestedByViewer;
   int date;
 
-  Account.loading(){
+  MiniAccount.loading(){
     fullName = "Loading...";
   }
 
-  Account({this.id, this.username, this.fullName, this.isVerified,
-      this.followedByViewer, this.followsViewer, this.profilePictureUrl,
+  MiniAccount({this.id, this.username, this.fullName, this.isVerified,
+      this.followedByViewer, this.followsViewer, this.profilePicUrl, this.profilePicUrlHd,
       this.requestedByViewer, this.date});
 
 
-  factory Account.fromJson(Map<String, dynamic> json){
-    return new Account(
+  factory MiniAccount.fromJson(Map<String, dynamic> json){
+    return new MiniAccount(
     id: json['id'],
     username: json['username'],
     fullName: json['fullName'],
     isVerified: json['isVerified'],
     followedByViewer: json['followedByViewer'],
     followsViewer: json['followsViewer'],
-    profilePictureUrl: json['profilePictureUrl'],
+    profilePicUrl: json['profilePicUrl'],
+    profilePicUrlHd: json['profilePicUrlHd'],
     requestedByViewer: json['requestedByViewer'],
     date: json['date']);
   }
@@ -45,7 +46,9 @@ class Account {
       'fullName': fullName,
       'isVerified':isVerified,
       'followsViewer':followsViewer,
-      'profilePictureUrl':profilePictureUrl,
+      'followedByViewer':followedByViewer,
+      'profilePicUrl':profilePicUrl,
+      'profilePicUrlHd':profilePicUrlHd,
       'requestedByViewer':requestedByViewer,
       'date':date
     };

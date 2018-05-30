@@ -8,21 +8,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
-final Firestore _db = Firestore.instance;
-
 
 class ProfilePage extends StatefulWidget {
   @override
   _ProfilePage createState() => _ProfilePage();
 }
 
-class _ProfilePage extends State<ProfilePage> {
+class _ProfilePage extends State<ProfilePage> with AutomaticKeepAliveClientMixin<ProfilePage>{
   bool _isLoading = true;
   bool _isLogin = false;
   bool _isProfile = false;
 
   Profile _profile = new Profile();
-  Account _account = new Account();
+  MiniAccount _account = new MiniAccount();
+  Map _map;
 
   Widget _buildProgress(){
     return new Center(
@@ -65,13 +64,52 @@ class _ProfilePage extends State<ProfilePage> {
                 ]))));
   }
 
-  Widget _buildProfile(Account account) {
+  Widget _buildProfile(MiniAccount account) {
     return new Container(
-                padding: const EdgeInsets.all(40.0),
+                padding: const EdgeInsets.all(20.0),
                 child: new Column(children: <Widget>[
-                  new CircleAvatar(backgroundImage: new NetworkImage(account.profilePictureUrl)),
-                    new Text(account.username),
-                    new Text(account.fullName)
+                    new CircleAvatar(
+                        backgroundImage: new NetworkImage(account.profilePicUrlHd),
+                        radius: 75.0,
+                    ),
+                    new Text(
+                        account.username,
+                        style: new TextStyle(color: Colors.black87, fontSize: 20.0 ),
+                    ),
+                    new Text(account.fullName,
+                      style: new TextStyle(color: Colors.black87, fontSize: 20.0 ),
+                    ),
+                  new Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                    new Column(children: <Widget>[
+                      new Text(
+                        '123456',
+                        style: new TextStyle(color: Colors.black87, fontSize: 20.0 ),
+                      ),
+                      new Text('posts',
+                        style: new TextStyle(color: Colors.black87, fontSize: 20.0 ),
+                      ),
+                    ]),
+                    new Column(children: <Widget>[
+                      new Text(
+                        '123456',
+                        style: new TextStyle(color: Colors.black87, fontSize: 20.0 ),
+                      ),
+                      new Text('followers',
+                        style: new TextStyle(color: Colors.black87, fontSize: 20.0 ),
+                      ),
+                    ]),
+                    new Column(children: <Widget>[
+                      new Text(
+                        '123456',
+                        style: new TextStyle(color: Colors.black87, fontSize: 20.0 ),
+                      ),
+                      new Text('following',
+                        style: new TextStyle(color: Colors.black87, fontSize: 20.0 ),
+                      ),
+                    ],)
+                  ],)
                 ]));
   }
 
@@ -92,14 +130,11 @@ class _ProfilePage extends State<ProfilePage> {
         return _buildProfile(_account);
   }
 
-  Future<Account> _login(){
+  Future<MiniAccount> _login(){
     _auth.currentUser().then((user){
-      print('--------------auth user');
       print(user);
         this._profile.uid = user.uid;
         _getProfile(user.uid).then((profile){
-          print('--------------profile');
-            print(profile);
             if(profile==null){
               setState(() {
                 _isProfile = false;
@@ -110,10 +145,9 @@ class _ProfilePage extends State<ProfilePage> {
             }
             else{
               _getLogin(profile).then((response){
-                print('--------------account');
-                  print(response);
-                  if(response.status=="SUCCESS"){
-                      _account = Account.fromJson(response.data);
+                  if(response is Map){
+                      _map = response;
+                      _account = MiniAccount.fromJson(response);
                       setState(() {
                       _isProfile = true;
                       _isLogin = true;
@@ -136,36 +170,29 @@ class _ProfilePage extends State<ProfilePage> {
 
   Future<Profile> _getProfile(String uid) async {
     var profile;
-    print('--------------1');
-
-    DocumentReference doc =
-    Firestore.instance.collection('profile').document(uid);
-    print('--------------2');
-
-    doc.get().then((onValue) {
-      print('--------------3');
-      print(onValue);
-      if (onValue.exists) {
-        print('--------------4');
-        profile = Profile.fromJson(onValue.data);
+    DocumentSnapshot doc = await Firestore.instance
+        .collection('profile')
+        .document(uid).get();
+      if (doc.exists) {
+        profile = Profile.fromJson(doc.data);
         return profile;
       }
-    });
+      else
+        throw Error;
   }
 
-  Future<StandardResponse> _getLogin(Profile user) async {
-    print("_login...$user");
+  Future<Map> _getLogin(Profile user) async {
     Map map = user.toMap();
     String data = json.encode(map);
-    var url = Endpoint.LOGIN;
-    http.Response response = await http.post(url,
+    http.Response response = await http.post(Endpoint.LOGIN,
         headers: {
           "Accept": "application/json",
           "Content-type": "application/json"
         },
         body: data);
+
     Map body = json.decode(response.body);
-    return new StandardResponse.fromJson(body);
+    return body;
   }
 
   Future<StandardResponse> _saveProfile(){
@@ -179,5 +206,9 @@ class _ProfilePage extends State<ProfilePage> {
           _login();
     });
   }
+
+  // TODO: implement wantKeepAlive
+  @override
+  bool get wantKeepAlive => true;
 
 }

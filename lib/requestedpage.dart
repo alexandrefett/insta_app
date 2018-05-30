@@ -27,7 +27,7 @@ class SecondPage extends StatefulWidget {
 class _SecondPage extends State<SecondPage>{
   int _total = 0;
   int _offset = -1 * (new DateTime.now().millisecondsSinceEpoch);
-  var cachedaccount = new Map<int, Account>();
+  var cachedaccount = new Map<int, MiniAccount>();
   var offsetLoaded = new Map<int, bool>();
 
   @override
@@ -45,7 +45,7 @@ class _SecondPage extends State<SecondPage>{
     var listView = new ListView.builder(
       itemCount: _total,
         itemBuilder: (BuildContext context, int index){
-          Account account = _getAccount(index);
+          MiniAccount account = _getAccount(index);
           return new ListTile(
             title: new Text(account.username)
           );
@@ -58,7 +58,7 @@ class _SecondPage extends State<SecondPage>{
     );
   }
 
-  Future<List<Account>> _getRequested(int offset, int limit) async{
+  Future<List<MiniAccount>> _getRequested(int offset, int limit) async{
     http.Response response = await http.get("http://10.125.121.64:4567/api/v1/requested?offset=$_offset&limit=$limit",
         headers: {
           "Accept":"application/json"
@@ -71,10 +71,10 @@ class _SecondPage extends State<SecondPage>{
     StandardResponse dataAccount = new StandardResponse.fromJson(data);
     if(dataAccount.status=="SUCCESS") {
       List list = dataAccount.data as List;
-      var datas = new List<Account>();
+      var datas = new List<MiniAccount>();
       list.forEach((element){
         Map map = element as Map;
-        datas.add(Account.fromJson(map));
+        datas.add(MiniAccount.fromJson(map));
       });
       setState((){
         _offset = datas.elementAt(datas.length-1).date;
@@ -83,21 +83,21 @@ class _SecondPage extends State<SecondPage>{
       return datas;
     }
     else {
-      List<Account> list = new List<Account>();
+      List<MiniAccount> list = new List<MiniAccount>();
       return list;
     }
   }
 
-  Account _getAccount(int index){
-    Account account = cachedaccount[index];
+  MiniAccount _getAccount(int index){
+    MiniAccount account = cachedaccount[index];
     if(account==null){
       int offset = _offset;
       if(!offsetLoaded.containsKey(offset)){
         offsetLoaded.putIfAbsent(offset, ()=> true);
         _getRequested(offset, 20)
-            .then((List<Account> accounts) => _updateAccounts(offset, accounts));
+            .then((List<MiniAccount> accounts) => _updateAccounts(offset, accounts));
       }
-      account = new Account.loading();
+      account = new MiniAccount.loading();
     }
     return account;
   }
@@ -106,7 +106,7 @@ class _SecondPage extends State<SecondPage>{
     return 100;
   }
 
-  void _updateAccounts(int offset, List<Account> accounts){
+  void _updateAccounts(int offset, List<MiniAccount> accounts){
     setState(() {
       for(int i = 0;i<accounts.length;i++){
         cachedaccount.putIfAbsent(offset+1, () => accounts[i]);

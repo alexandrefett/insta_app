@@ -30,7 +30,7 @@ class _SecondPage extends State<SecondPage> with AutomaticKeepAliveClientMixin<S
 
 
   int _offset = -1 * (new DateTime.now().millisecondsSinceEpoch);
-  var cacheddata = new Map<int, Account>();
+  var cacheddata = new Map<int, MiniAccount>();
   var offsetLoaded = new Map<int, bool>();
   int _total = 0;
 
@@ -75,7 +75,7 @@ class _SecondPage extends State<SecondPage> with AutomaticKeepAliveClientMixin<S
     return 1;
   }
 
-  void _updateDatas(int offset, List<Account> datas) {
+  void _updateDatas(int offset, List<MiniAccount> datas) {
     setState((){
       for (int i=0; i < datas.length; i++) {
         cacheddata.putIfAbsent(offset + i, () => datas[i]);
@@ -84,7 +84,7 @@ class _SecondPage extends State<SecondPage> with AutomaticKeepAliveClientMixin<S
     });
   }
 
-  Future<List<Account>> _getRequested(int offset, int limit) async{
+  Future<List<MiniAccount>> _getRequested(int offset, int limit) async{
     print("loading...:");
 
     CollectionReference ref = Firestore.instance
@@ -107,10 +107,10 @@ class _SecondPage extends State<SecondPage> with AutomaticKeepAliveClientMixin<S
     StandardResponse dataAccount = new StandardResponse.fromJson(data);
     if(dataAccount.status=="SUCCESS") {
       List list = dataAccount.data as List;
-      var datas = new List<Account>();
+      var datas = new List<MiniAccount>();
       list.forEach((element){
         Map map = element as Map;
-        datas.add(Account.fromJson(map));
+        datas.add(MiniAccount.fromJson(map));
       });
       setState((){
         _offset = datas.elementAt(datas.length-1).date+1;
@@ -120,21 +120,21 @@ class _SecondPage extends State<SecondPage> with AutomaticKeepAliveClientMixin<S
       return datas;
     }
     else {
-      List<Account> list = new List<Account>();
+      List<MiniAccount> list = new List<MiniAccount>();
       return list;
     }
   }
 
-  Account _getData(int index) {
-    Account data = cacheddata[index];
+  MiniAccount _getData(int index) {
+    MiniAccount data = cacheddata[index];
     if (data == null) {
       int offset = index ~/ 20 * 20;
       if (!offsetLoaded.containsKey(offset)) {
         offsetLoaded.putIfAbsent(offset, () => true);
         _getRequested(_offset, 20)
-            .then((List<Account> datas) => _updateDatas(offset, datas));
+            .then((List<MiniAccount> datas) => _updateDatas(offset, datas));
       }
-      data = new Account.loading();
+      data = new MiniAccount.loading();
     }
     return data;
   }
