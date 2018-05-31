@@ -1,11 +1,13 @@
+import 'dart:convert';
+
 class Endpoint{
-    static const DOMAIN_V1 = 'http://192.168.0.18:8080/api/v1';
+    static const DOMAIN_V1 = 'http://186.228.87.122:8080/api/v1';
     static const LOGIN = DOMAIN_V1 + '/login';
     static const GET_ACCOUNT = DOMAIN_V1 + '/account';
     static const GET_PROFILE = DOMAIN_V1 + '/profile';
 }
 
-class MiniAccount {
+class Account {
   int id;
   String username;
   String fullName;
@@ -16,28 +18,35 @@ class MiniAccount {
   String profilePicUrlHd;
   bool requestedByViewer;
   int date;
+  String biography;
+  int followedBy;
+  int follows;
 
-  MiniAccount.loading(){
+  Account.loading(){
     fullName = "Loading...";
   }
 
-  MiniAccount({this.id, this.username, this.fullName, this.isVerified,
+  Account({this.biography, this.id, this.username, this.fullName, this.isVerified,
       this.followedByViewer, this.followsViewer, this.profilePicUrl, this.profilePicUrlHd,
-      this.requestedByViewer, this.date});
+      this.requestedByViewer, this.date, this.follows, this.followedBy});
 
-
-  factory MiniAccount.fromJson(Map<String, dynamic> json){
-    return new MiniAccount(
-    id: json['id'],
-    username: json['username'],
-    fullName: json['fullName'],
-    isVerified: json['isVerified'],
-    followedByViewer: json['followedByViewer'],
-    followsViewer: json['followsViewer'],
-    profilePicUrl: json['profilePicUrl'],
-    profilePicUrlHd: json['profilePicUrlHd'],
-    requestedByViewer: json['requestedByViewer'],
-    date: json['date']);
+  factory Account.fromJson(Map<String, dynamic> map){
+    print(map);
+    return new Account(
+    biography: map['biography'],
+    id: map['id'],
+    username: map['username'],
+    fullName: map['fullName'],
+    isVerified: map['isVerified'],
+    followedByViewer: map['followedByViewer'],
+    followsViewer: map['followsViewer'],
+    profilePicUrl: map['profilePicUrl'],
+    profilePicUrlHd: map['profilePicUrlHd'],
+    requestedByViewer: map['requestedByViewer'],
+    date: map['date'],
+    follows: map['follows'],
+    followedBy: map['followedBy']
+    );
   }
   Map<String, dynamic> toMap() {
     return {
@@ -50,6 +59,8 @@ class MiniAccount {
       'profilePicUrl':profilePicUrl,
       'profilePicUrlHd':profilePicUrlHd,
       'requestedByViewer':requestedByViewer,
+      'follows':follows,
+      'followedBy':followedBy,
       'date':date
     };
   }
@@ -63,12 +74,12 @@ class Profile{
 
   Profile({this.uid, this.password, this.username, this.plan});
 
-  factory Profile.fromJson(Map<String, dynamic> json){
+  factory Profile.fromJson(Map<String, dynamic> map){
     return new Profile(
-        uid: json['uid'],
-        username: json['username'],
-        plan: json['plan'],
-        password: json['password']);
+        uid: map['uid'],
+        username: map['username'],
+        plan: map['plan'],
+        password: map['password']);
   }
 
   Map<String, dynamic> toMap() {
@@ -88,10 +99,10 @@ class StandardResponse {
 
   StandardResponse({this.message, this.status, this.data});
 
-  StandardResponse.fromJson(Map<String, dynamic> json){
-    message = json['message'];
-    status = json['status'];
-    data = json['data'];
+  StandardResponse.fromJson(Map<String, dynamic> map){
+    message = map['message'];
+    status = map['status'];
+    data = map['data'];
   }
 
   Map<String, dynamic> toMap() {

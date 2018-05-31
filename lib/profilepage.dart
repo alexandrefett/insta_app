@@ -20,7 +20,7 @@ class _ProfilePage extends State<ProfilePage> with AutomaticKeepAliveClientMixin
   bool _isProfile = false;
 
   Profile _profile = new Profile();
-  MiniAccount _account = new MiniAccount();
+  Account _account = new Account();
   Map _map;
 
   Widget _buildProgress(){
@@ -64,49 +64,43 @@ class _ProfilePage extends State<ProfilePage> with AutomaticKeepAliveClientMixin
                 ]))));
   }
 
-  Widget _buildProfile(MiniAccount account) {
+  Widget _buildProfile(Account account) {
     return new Container(
                 padding: const EdgeInsets.all(20.0),
                 child: new Column(children: <Widget>[
                     new CircleAvatar(
-                        backgroundImage: new NetworkImage(account.profilePicUrlHd),
+                        backgroundImage: new NetworkImage(account.profilePicUrl),
                         radius: 75.0,
                     ),
                     new Text(
                         account.username,
-                        style: new TextStyle(color: Colors.black87, fontSize: 20.0 ),
+                        style: new TextStyle(color: Colors.black87,
+                            fontSize: 18.0, fontWeight: FontWeight.bold ),
                     ),
                     new Text(account.fullName,
-                      style: new TextStyle(color: Colors.black87, fontSize: 20.0 ),
+                      style: new TextStyle(color: Colors.black87, fontSize: 18.0 ),
                     ),
                   new Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
                     new Column(children: <Widget>[
                       new Text(
-                        '123456',
-                        style: new TextStyle(color: Colors.black87, fontSize: 20.0 ),
-                      ),
-                      new Text('posts',
-                        style: new TextStyle(color: Colors.black87, fontSize: 20.0 ),
-                      ),
-                    ]),
-                    new Column(children: <Widget>[
-                      new Text(
-                        '123456',
-                        style: new TextStyle(color: Colors.black87, fontSize: 20.0 ),
+                        account.followedBy.toString(),
+                        style: new TextStyle(color: Colors.black87,
+                            fontSize: 18.0,fontWeight: FontWeight.bold ),
                       ),
                       new Text('followers',
-                        style: new TextStyle(color: Colors.black87, fontSize: 20.0 ),
+                        style: new TextStyle(color: Colors.black87, fontSize: 16.0 ),
                       ),
                     ]),
                     new Column(children: <Widget>[
                       new Text(
-                        '123456',
-                        style: new TextStyle(color: Colors.black87, fontSize: 20.0 ),
+                        account.follows.toString(),
+                        style: new TextStyle(color: Colors.black87,
+                            fontSize: 18.0,fontWeight: FontWeight.bold ),
                       ),
                       new Text('following',
-                        style: new TextStyle(color: Colors.black87, fontSize: 20.0 ),
+                        style: new TextStyle(color: Colors.black87, fontSize: 16.0 ),
                       ),
                     ],)
                   ],)
@@ -130,7 +124,7 @@ class _ProfilePage extends State<ProfilePage> with AutomaticKeepAliveClientMixin
         return _buildProfile(_account);
   }
 
-  Future<MiniAccount> _login(){
+  Future<Account> _login(){
     _auth.currentUser().then((user){
       print(user);
         this._profile.uid = user.uid;
@@ -147,7 +141,7 @@ class _ProfilePage extends State<ProfilePage> with AutomaticKeepAliveClientMixin
               _getLogin(profile).then((response){
                   if(response is Map){
                       _map = response;
-                      _account = MiniAccount.fromJson(response);
+                      _account = Account.fromJson(response);
                       setState(() {
                       _isProfile = true;
                       _isLogin = true;

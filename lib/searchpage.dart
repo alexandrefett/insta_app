@@ -14,7 +14,7 @@ class SearchPage extends StatefulWidget {
 class _SearchPage extends State<SearchPage>
     with AutomaticKeepAliveClientMixin<SearchPage> {
   Firestore firestore;
-  var _list = new List<MiniAccount>();
+  var _list = new List<Account>();
   var search;
 
   Future<Firestore> connect() async {
@@ -55,7 +55,7 @@ class _SearchPage extends State<SearchPage>
       new ListView.builder(
           itemCount: _list.length,
           itemBuilder: (BuildContext context, int index) {
-            MiniAccount account = _list[index];
+            Account account = _list[index];
             return new ListTile(
                 leading: new CircleAvatar(
                     child: new Image.network(account.profilePicUrl)),
@@ -66,14 +66,14 @@ class _SearchPage extends State<SearchPage>
   }
 
   void _search() {
-    _getSearch(search).then((List<MiniAccount> list) {
+    _getSearch(search).then((List<Account> list) {
       setState(() {
         this._list = list;
       });
     });
   }
 
-  Future<List<MiniAccount>> _getSearch(String search) async {
+  Future<List<Account>> _getSearch(String search) async {
     print("loading...:");
     http.Response response = await http.get(
         "http://192.168.0.18:8080/api/v1/search?query=$search",
