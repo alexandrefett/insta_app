@@ -21,7 +21,6 @@ class _ProfilePage extends State<ProfilePage> with AutomaticKeepAliveClientMixin
 
   Profile _profile = new Profile();
   Account _account = new Account();
-  Map _map;
 
   Widget _buildProgress(){
     return new Center(
@@ -80,6 +79,9 @@ class _ProfilePage extends State<ProfilePage> with AutomaticKeepAliveClientMixin
                     new Text(account.fullName,
                       style: new TextStyle(color: Colors.black87, fontSize: 18.0 ),
                     ),
+                    const Divider(
+                      height: 2.0,
+                    ),
                   new Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
@@ -102,13 +104,15 @@ class _ProfilePage extends State<ProfilePage> with AutomaticKeepAliveClientMixin
                       new Text('following',
                         style: new TextStyle(color: Colors.black87, fontSize: 16.0 ),
                       ),
+                      const Divider(
+                        height: 2.0,
+                      ),
                     ],)
                   ],)
                 ]));
   }
 
-  @override
-  void initState() {
+  @override  void initState() {
     _login();
     super.initState();
   }
@@ -118,10 +122,10 @@ class _ProfilePage extends State<ProfilePage> with AutomaticKeepAliveClientMixin
     if(_isLoading)
       return _buildProgress();
     else
-      if(!_isProfile)
-        return _buildForm();
-      if(_isLogin)
-        return _buildProfile(_account);
+    if(!_isProfile)
+      return _buildForm();
+    if(_isLogin)
+      return _buildProfile(_account);
   }
 
   Future<Account> _login(){
@@ -140,13 +144,12 @@ class _ProfilePage extends State<ProfilePage> with AutomaticKeepAliveClientMixin
             else{
               _getLogin(profile).then((response){
                   if(response is Map){
-                      _map = response;
                       _account = Account.fromJson(response);
                       setState(() {
-                      _isProfile = true;
-                      _isLogin = true;
-                      _isLoading = false;
-                    });
+                        _isProfile = true;
+                        _isLogin = true;
+                        _isLoading = false;
+                      });
                   }
                   else{
                     setState(() {

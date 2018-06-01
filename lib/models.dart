@@ -5,9 +5,61 @@ class Endpoint{
     static const LOGIN = DOMAIN_V1 + '/login';
     static const GET_ACCOUNT = DOMAIN_V1 + '/account';
     static const GET_PROFILE = DOMAIN_V1 + '/profile';
+    static const GET_SEARCH = DOMAIN_V1 + '/search';
+}
+abstract class ListItem {}
+class Search {
+  int position;
+  dynamic element;
+
+  Search({this.position, this.element});
+
+  factory Search.fromJson(Map<String, dynamic> map){
+    return new Search(
+        position: map['position'],
+        element:map['element']
+    );
+  }
 }
 
-class Account {
+class HashTag implements ListItem{
+  String name;
+  int id;
+  int mediaCount;
+
+  HashTag({this.name, this.id, this.mediaCount});
+
+  factory HashTag.fromJson(Map<String, dynamic> map){
+    return new HashTag(
+        name: map['name'],
+        id: map['id'],
+        mediaCount: map['media_count']
+    );
+  }
+}
+
+class Place  implements ListItem{
+  String id;
+  String title;
+  String subtitle;
+  String slug;
+  List media;
+
+  Place({this.id, this.title, this.subtitle, this.slug, this.media});
+
+  factory Place.fromJson(Map<String, dynamic> map){
+    Map<String, dynamic> location = map['location'];
+    return new Place(
+      id: location['pk'],
+      title: map['title'],
+      subtitle:map['subtitle'],
+      slug:map['slug'],
+      media:map['media'] as List
+    );
+  }
+}
+
+class Account implements ListItem{
   int id;
   String username;
   String fullName;
@@ -31,7 +83,6 @@ class Account {
       this.requestedByViewer, this.date, this.follows, this.followedBy});
 
   factory Account.fromJson(Map<String, dynamic> map){
-    print(map);
     return new Account(
     biography: map['biography'],
     id: map['id'],

@@ -13,35 +13,17 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPage extends State<SearchPage>
     with AutomaticKeepAliveClientMixin<SearchPage> {
-  Firestore firestore;
-  var _list = new List<Account>();
+  List<ListItem> _data = new List<ListItem>();
   var search;
-
-  Future<Firestore> connect() async {
-    final FirebaseApp app = await FirebaseApp.configure(
-      name: 'InstaManager',
-      options: const FirebaseOptions(
-        googleAppID: '1:8181935955:android:f442fb586be1c267',
-        gcmSenderID: '8181935955',
-        apiKey: 'AIzaSyBaefpr0jIHFdrIFOYWRCnzmlmIlYZqTlk',
-        projectID: 'instamanager-908a3',
-      ),
-    );
-    return new Firestore(app: app);
-  }
-
-  @override
-  void initState() {
-    connect().then((Firestore firestore) {
-      this.firestore = firestore;
-    });
-    super.initState();
-  }
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
-    return new Column(children: <Widget>[
-      new Row(children: <Widget>[
+    Widget _buildProgress = new Center(child: new CircularProgressIndicator());
+
+    Widget _buildSearch = new Row(
+      //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
         new TextField(
             keyboardType: TextInputType.text,
             onChanged: (String value) {
@@ -50,42 +32,182 @@ class _SearchPage extends State<SearchPage>
         new FlatButton(
             onPressed: null,
             child: new IconButton(
-                icon: new Icon(Icons.keyboard_return), onPressed: _search))
-      ]),
-      new ListView.builder(
-          itemCount: _list.length,
-          itemBuilder: (BuildContext context, int index) {
-            Account account = _list[index];
-            return new ListTile(
-                leading: new CircleAvatar(
-                    child: new Image.network(account.profilePicUrl)),
-                title: new Text(account.username),
-                subtitle: new Text(account.username));
-          })
-    ]);
+                icon: new Icon(Icons.keyboard_return),
+                onPressed: () {
+                  FocusScope.of(context).requestFocus(new FocusNode());
+                  _search(this.search);
+                }))
+      ],
+    );
+
+    ListTile _tileAccount(Account account) {
+      return new ListTile(
+        leading: new CircleAvatar(
+          backgroundImage: new NetworkImage(account.profilePicUrl),
+        ),
+        title: new Text(
+          account.username,
+          style: new TextStyle(fontWeight: FontWeight.bold),
+        ),
+        subtitle: new Text(account.fullName),
+        trailing: new FlatButton(
+            onPressed: () {
+              _addToFollow(account);
+            },
+            child: new Text('Follow')),
+      );
+    };
+
+    ListTile _tileHashTag(HashTag hashTag) {
+      return new ListTile(
+        leading: new CircleAvatar(
+            backgroundImage: new AssetImage('assets/hashtag.png')),
+        title: new Text(
+          '#'+ hashTag.name,
+          style: new TextStyle(fontWeight: FontWeight.bold),
+        ),
+        subtitle: new Text('Count: ${hashTag.mediaCount}'),
+        trailing: new FlatButton(
+            onPressed: () {
+              _addToFollow(hashTag);
+            },
+            child: new Text('Follow')),
+      );
+    };
+
+    ListTile _tilePlace(Place place) {
+      return new ListTile(
+        leading: new CircleAvatar(
+            backgroundImage: new AssetImage('assets/hashtag.png')),
+        title: new Text(
+          place.title,
+          style: new TextStyle(fontWeight: FontWeight.bold),
+        ),
+        subtitle: new Text(place.subtitle),
+        trailing: new FlatButton(
+            onPressed: () {
+              _addToFollow(place);
+            },
+            child: new Text('Follow')),
+      );
+    };
+
+    Widget _buildList = new ListView.builder(
+        itemCount: _data == null ? 0 : _data.length,
+        itemBuilder: (BuildContext context, int index) {
+          final item = _data[index];
+          print(item);
+          if (item is Account) {
+            return _tileAccount(item);
+          }
+          if (item is HashTag) {
+            return _tileHashTag(item);
+          }
+          if (item is Place) {
+            return _tilePlace(item);
+          }
+        });
+
+    return new Container(
+        padding: new EdgeInsets.all(10.0),
+        child: new Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              new ListTile(
+                  title: new TextField(
+                    decoration: new InputDecoration(
+                        hintText: "search",
+                        border: new OutlineInputBorder(
+                          borderRadius: const BorderRadius.all(
+                            const Radius.circular(10.0),
+                          ),
+                          borderSide: new BorderSide(
+                            color: Colors.black,
+                            width: 1.0,
+                          ),
+                        )),
+                    onChanged: (String value) {
+                      this.search = value;
+                    },
+                  ),
+                  trailing: new FlatButton(
+                      onPressed: () {
+                        _search(this.search);
+                      },
+                      child: new IconButton(
+                          color: Colors.blue, icon: new Icon(Icons.search)))),
+              new Expanded(child: _isLoading ? _buildProgress : _buildList)
+            ]));
   }
 
-  void _search() {
-    _getSearch(search).then((List<Account> list) {
-      setState(() {
-        this._list = list;
-      });
+  void _addToFollow(dynamic follow) {
+    print(follow);
+  }
+
+  Future<String> _search(String search) async {
+    setState(() {
+      _isLoading = true;
     });
-  }
-
-  Future<List<Account>> _getSearch(String search) async {
     print("loading...:");
     http.Response response = await http.get(
-        "http://192.168.0.18:8080/api/v1/search?query=$search",
+        Endpoint.GET_SEARCH + '?query=$search',
         headers: {"Accept": "application/json"});
-    print('URL= ' + response.request.url.toString());
     print(response.body);
-    Map data = json.decode(response.body);
-    List list = data as List;
-    return list;
+    Map map = json.decode(response.body);
+    List accounts = map['users'] as List;
+    List places = map['places'] as List;
+    List hashtags = map['hashtags'] as List;
+
+    var datas = new List<Search>();
+
+    accounts.forEach((element) {
+      Map map = element as Map;
+      print(map);
+      Map temp = map['user'];
+      int position = map['position'];
+      datas.add(
+          new Search(
+              position: position,
+              element: new Account(
+                profilePicUrl: temp['profile_pic_url'],
+                fullName:temp['full_name'],
+                followedBy: temp['follower_count'],
+                id: int.parse(temp['pk']),
+                isVerified: temp['is_verified'],
+                username: temp['username']
+      )));
+    });
+
+    hashtags.forEach((element) {
+      map = element as Map;
+      print(map);
+      Map temp = map['hashtag'];
+      int position = map['position'];
+      datas.add(new Search(position: position, element: HashTag.fromJson(temp)));
+    });
+
+    places.forEach((element) {
+      map = element as Map;
+      print(map);
+      Map temp = map['place'];
+      int position = map['position'];
+      Map location = temp['location'];
+      datas.add(new Search(position: position, element: Place.fromJson(temp)));
+    });
+
+    datas.sort((a, b) => a.position.compareTo(b.position));
+    _data.clear();
+    setState(() {
+      datas.forEach((search){
+        _data.add(search.element);
+      });
+      _isLoading = false;
+      print(_data.length);
+    });
+    return 'Success!';
   }
 
   // TODO: implement wantKeepAlive
   @override
-  bool get wantKeepAlive => null;
+  bool get wantKeepAlive => true;
 }

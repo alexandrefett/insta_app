@@ -3,6 +3,7 @@ import 'package:insta_app/profilepage.dart';
 import 'package:insta_app/requestedpage2.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:insta_app/searchpage.dart';
 import 'package:insta_app/whitelistpage.dart';
 
 class MainPageApp extends StatelessWidget {
@@ -42,7 +43,7 @@ class _MainPageState extends State<MainPage> {
                 child: new ProfilePage(),
               ),
               new Container(
-                child: new WhiteListPage(),
+                child: new SearchPage(),
               ),
               new Container(
                 child: new SecondPage(),
