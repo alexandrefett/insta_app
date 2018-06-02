@@ -16,29 +16,52 @@ class _SearchPage extends State<SearchPage>
   List<ListItem> _data = new List<ListItem>();
   var search;
   bool _isLoading = false;
+  final TextEditingController _controller = new TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     Widget _buildProgress = new Center(child: new CircularProgressIndicator());
 
-    Widget _buildSearch = new Row(
+    Widget _buildSearch = new Container(
+        decoration: new BoxDecoration(color: Colors.blue),
+        child: new Row(
       //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        new TextField(
+        new Flexible(
+          child: new TextField(controller: _controller,
+              decoration: new InputDecoration(
+                  hintText: "search",
+                  border: new OutlineInputBorder(
+                    borderRadius: const BorderRadius.all(
+                      const Radius.circular(15.0),
+                    ),
+                    borderSide: new BorderSide(
+                      color: Colors.black,
+                      width: 2.0,
+                    ),
+                  )),
             keyboardType: TextInputType.text,
             onChanged: (String value) {
               this.search = value;
-            }),
-        new FlatButton(
-            onPressed: null,
-            child: new IconButton(
-                icon: new Icon(Icons.keyboard_return),
+            })),
+        new IconButton(color: Colors.grey,
+                icon: new Icon(Icons.clear,color: Colors.black),
+                onPressed: () {
+                  FocusScope.of(context).requestFocus(new FocusNode());
+                  _controller.clear();
+                  setState(() {
+                    _data.clear();
+                  });
+                }),
+        new IconButton(color: Colors.blue,
+                icon: new Icon(Icons.search,color: Colors.black),
                 onPressed: () {
                   FocusScope.of(context).requestFocus(new FocusNode());
                   _search(this.search);
-                }))
+                })
+
       ],
-    );
+    ));
 
     ListTile _tileAccount(Account account) {
       return new ListTile(
@@ -61,7 +84,10 @@ class _SearchPage extends State<SearchPage>
     ListTile _tileHashTag(HashTag hashTag) {
       return new ListTile(
         leading: new CircleAvatar(
-            backgroundImage: new AssetImage('assets/hashtag.png')),
+          backgroundColor: Colors.black12,
+          child: new Text(
+            '#',
+            style: new TextStyle(fontStyle: FontStyle.italic,color: Colors.black),),),
         title: new Text(
           '#'+ hashTag.name,
           style: new TextStyle(fontWeight: FontWeight.bold),
@@ -78,7 +104,8 @@ class _SearchPage extends State<SearchPage>
     ListTile _tilePlace(Place place) {
       return new ListTile(
         leading: new CircleAvatar(
-            backgroundImage: new AssetImage('assets/hashtag.png')),
+          backgroundColor: Colors.black12,
+          child: const Icon(Icons.place,color: Colors.black,)),
         title: new Text(
           place.title,
           style: new TextStyle(fontWeight: FontWeight.bold),
@@ -109,21 +136,20 @@ class _SearchPage extends State<SearchPage>
         });
 
     return new Container(
-        padding: new EdgeInsets.all(10.0),
+        padding: new EdgeInsets.all(5.0),
         child: new Column(
             crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              new ListTile(
-                  title: new TextField(
+            children: <Widget>[_buildSearch,
+              /*new ListTile(title: new TextField(
                     decoration: new InputDecoration(
                         hintText: "search",
                         border: new OutlineInputBorder(
                           borderRadius: const BorderRadius.all(
-                            const Radius.circular(10.0),
+                            const Radius.circular(2.0),
                           ),
                           borderSide: new BorderSide(
                             color: Colors.black,
-                            width: 1.0,
+                            width: 10.0,
                           ),
                         )),
                     onChanged: (String value) {
@@ -131,11 +157,10 @@ class _SearchPage extends State<SearchPage>
                     },
                   ),
                   trailing: new FlatButton(
-                      onPressed: () {
-                        _search(this.search);
-                      },
                       child: new IconButton(
-                          color: Colors.blue, icon: new Icon(Icons.search)))),
+                          onPressed: () { _search(this.search);},
+                          color: Colors.blue,
+                          icon: new Icon(Icons.search, color: Colors.black,)))),*/
               new Expanded(child: _isLoading ? _buildProgress : _buildList)
             ]));
   }
@@ -148,7 +173,6 @@ class _SearchPage extends State<SearchPage>
     setState(() {
       _isLoading = true;
     });
-    print("loading...:");
     http.Response response = await http.get(
         Endpoint.GET_SEARCH + '?query=$search',
         headers: {"Accept": "application/json"});
@@ -162,7 +186,6 @@ class _SearchPage extends State<SearchPage>
 
     accounts.forEach((element) {
       Map map = element as Map;
-      print(map);
       Map temp = map['user'];
       int position = map['position'];
       datas.add(
@@ -180,7 +203,6 @@ class _SearchPage extends State<SearchPage>
 
     hashtags.forEach((element) {
       map = element as Map;
-      print(map);
       Map temp = map['hashtag'];
       int position = map['position'];
       datas.add(new Search(position: position, element: HashTag.fromJson(temp)));
@@ -188,7 +210,6 @@ class _SearchPage extends State<SearchPage>
 
     places.forEach((element) {
       map = element as Map;
-      print(map);
       Map temp = map['place'];
       int position = map['position'];
       Map location = temp['location'];
@@ -202,7 +223,6 @@ class _SearchPage extends State<SearchPage>
         _data.add(search.element);
       });
       _isLoading = false;
-      print(_data.length);
     });
     return 'Success!';
   }
