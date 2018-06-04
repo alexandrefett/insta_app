@@ -1,13 +1,56 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Endpoint{
     static const DOMAIN_V1 = 'http://186.228.87.122:8080/api/v1';
     static const LOGIN = DOMAIN_V1 + '/login';
     static const GET_ACCOUNT = DOMAIN_V1 + '/account';
     static const GET_PROFILE = DOMAIN_V1 + '/profile';
     static const GET_SEARCH = DOMAIN_V1 + '/search';
+    static const GET_FOLLOWS = DOMAIN_V1 + '/follows';
 }
+
 abstract class ListItem {}
+
+class PageObject<T> {
+  List<T> nodes;
+  int count;
+  PageInfo pageInfo;
+
+  PageObject({this.nodes, this.count, this.pageInfo});
+  factory PageObject.fromJson(Map<String, dynamic> map){
+    return new PageObject(
+        nodes: map['nodes'] as List,
+        count:map['count'],
+        pageInfo:PageInfo.fromJson(map['pageInfo'])
+    );
+  }
+}
+
+
+class PageInfo{
+  bool hasNextPage;
+  String endCursor;
+
+  PageInfo({this.hasNextPage, this.endCursor});
+
+  factory PageInfo.fromJson(Map<String, dynamic> map){
+    return new PageInfo(
+        hasNextPage: map['has_next_page'],
+        endCursor:map['end_cursor']
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'hasNextPage': hasNextPage,
+      'endCursor': endCursor
+    };
+  }
+
+}
+
 class Search {
   int position;
   dynamic element;
@@ -36,6 +79,15 @@ class HashTag implements ListItem{
         mediaCount: map['media_count']
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'mediaCount': mediaCount
+    };
+  }
+
 }
 
 class Place  implements ListItem{
@@ -56,6 +108,15 @@ class Place  implements ListItem{
       slug:map['slug'],
       media:map['media'] as List
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'title': title,
+      'subtitle': subtitle,
+      'slug':slug
+    };
   }
 }
 
@@ -84,21 +145,38 @@ class Account implements ListItem{
 
   factory Account.fromJson(Map<String, dynamic> map){
     return new Account(
-    biography: map['biography'],
-    id: map['id'],
-    username: map['username'],
-    fullName: map['fullName'],
-    isVerified: map['isVerified'],
-    followedByViewer: map['followedByViewer'],
-    followsViewer: map['followsViewer'],
-    profilePicUrl: map['profilePicUrl'],
-    profilePicUrlHd: map['profilePicUrlHd'],
-    requestedByViewer: map['requestedByViewer'],
-    date: map['date'],
-    follows: map['follows'],
-    followedBy: map['followedBy']
+        biography: map['biography'],
+        id: map['id'],
+        username: map['username'],
+        fullName: map['fullName'],
+        isVerified: map['isVerified'],
+        followedByViewer: map['followedByViewer'],
+        followsViewer: map['followsViewer'],
+        profilePicUrl: map['profilePicUrl'],
+        profilePicUrlHd: map['profilePicUrlHd'],
+        requestedByViewer: map['requestedByViewer'],
+        date: map['date'],
+        follows: map['follows'],
+        followedBy: map['followedBy']
     );
   }
+    factory Account.fromDoc(DocumentSnapshot map){
+      return new Account(
+          biography: map['biography'],
+          id: map['id'],
+          username: map['username'],
+          fullName: map['fullName'],
+          isVerified: map['isVerified'],
+          followedByViewer: map['followedByViewer'],
+          followsViewer: map['followsViewer'],
+          profilePicUrl: map['profilePicUrl'],
+          profilePicUrlHd: map['profilePicUrlHd'],
+          requestedByViewer: map['requestedByViewer'],
+          date: map['date'],
+          follows: map['follows'],
+          followedBy: map['followedBy']
+      );
+    }
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -126,6 +204,14 @@ class Profile{
   Profile({this.uid, this.password, this.username, this.plan});
 
   factory Profile.fromJson(Map<String, dynamic> map){
+    return new Profile(
+        uid: map['uid'],
+        username: map['username'],
+        plan: map['plan'],
+        password: map['password']);
+  }
+
+  factory Profile.fromDoc(DocumentSnapshot map){
     return new Profile(
         uid: map['uid'],
         username: map['username'],

@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:insta_app/models.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+FirebaseUser user;
 
 class SearchPage extends StatefulWidget {
   @override
@@ -14,54 +16,22 @@ class SearchPage extends StatefulWidget {
 class _SearchPage extends State<SearchPage>
     with AutomaticKeepAliveClientMixin<SearchPage> {
   List<ListItem> _data = new List<ListItem>();
-  var search;
   bool _isLoading = false;
   final TextEditingController _controller = new TextEditingController();
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    FirebaseAuth.instance.currentUser()
+        .then((onValue) => user = onValue);
+  }
+  @override
   Widget build(BuildContext context) {
-    Widget _buildProgress = new Center(child: new CircularProgressIndicator());
 
-    Widget _buildSearch = new Container(
-        decoration: new BoxDecoration(color: Colors.blue),
-        child: new Row(
-      //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        new Flexible(
-          child: new TextField(controller: _controller,
-              decoration: new InputDecoration(
-                  hintText: "search",
-                  border: new OutlineInputBorder(
-                    borderRadius: const BorderRadius.all(
-                      const Radius.circular(15.0),
-                    ),
-                    borderSide: new BorderSide(
-                      color: Colors.black,
-                      width: 2.0,
-                    ),
-                  )),
-            keyboardType: TextInputType.text,
-            onChanged: (String value) {
-              this.search = value;
-            })),
-        new IconButton(color: Colors.grey,
-                icon: new Icon(Icons.clear,color: Colors.black),
-                onPressed: () {
-                  FocusScope.of(context).requestFocus(new FocusNode());
-                  _controller.clear();
-                  setState(() {
-                    _data.clear();
-                  });
-                }),
-        new IconButton(color: Colors.blue,
-                icon: new Icon(Icons.search,color: Colors.black),
-                onPressed: () {
-                  FocusScope.of(context).requestFocus(new FocusNode());
-                  _search(this.search);
-                })
-
-      ],
-    ));
+    Widget _buildProgress = new SliverFillRemaining(
+        child: new Center(
+            child: new CircularProgressIndicator()));
 
     ListTile _tileAccount(Account account) {
       return new ListTile(
@@ -87,9 +57,10 @@ class _SearchPage extends State<SearchPage>
           backgroundColor: Colors.black12,
           child: new Text(
             '#',
-            style: new TextStyle(fontStyle: FontStyle.italic,color: Colors.black),),),
+            style: new TextStyle(
+                fontStyle: FontStyle.italic, color: Colors.black),),),
         title: new Text(
-          '#'+ hashTag.name,
+          '#' + hashTag.name,
           style: new TextStyle(fontWeight: FontWeight.bold),
         ),
         subtitle: new Text('Count: ${hashTag.mediaCount}'),
@@ -104,8 +75,8 @@ class _SearchPage extends State<SearchPage>
     ListTile _tilePlace(Place place) {
       return new ListTile(
         leading: new CircleAvatar(
-          backgroundColor: Colors.black12,
-          child: const Icon(Icons.place,color: Colors.black,)),
+            backgroundColor: Colors.black12,
+            child: const Icon(Icons.place, color: Colors.black,)),
         title: new Text(
           place.title,
           style: new TextStyle(fontWeight: FontWeight.bold),
@@ -119,54 +90,77 @@ class _SearchPage extends State<SearchPage>
       );
     };
 
-    Widget _buildList = new ListView.builder(
-        itemCount: _data == null ? 0 : _data.length,
-        itemBuilder: (BuildContext context, int index) {
-          final item = _data[index];
-          print(item);
-          if (item is Account) {
-            return _tileAccount(item);
-          }
-          if (item is HashTag) {
-            return _tileHashTag(item);
-          }
-          if (item is Place) {
-            return _tilePlace(item);
-          }
-        });
+    ListTile _buildTile(ListItem item){
+      if (item is Account) {
+        return _tileAccount(item);
+      }
+      if (item is HashTag) {
+        return _tileHashTag(item);
+      }
+      if (item is Place) {
+        return _tilePlace(item);
+      }
+    };
 
-    return new Container(
-        padding: new EdgeInsets.all(5.0),
-        child: new Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[_buildSearch,
-              /*new ListTile(title: new TextField(
-                    decoration: new InputDecoration(
-                        hintText: "search",
-                        border: new OutlineInputBorder(
-                          borderRadius: const BorderRadius.all(
-                            const Radius.circular(2.0),
-                          ),
-                          borderSide: new BorderSide(
-                            color: Colors.black,
-                            width: 10.0,
-                          ),
-                        )),
-                    onChanged: (String value) {
-                      this.search = value;
-                    },
-                  ),
-                  trailing: new FlatButton(
-                      child: new IconButton(
-                          onPressed: () { _search(this.search);},
-                          color: Colors.blue,
-                          icon: new Icon(Icons.search, color: Colors.black,)))),*/
-              new Expanded(child: _isLoading ? _buildProgress : _buildList)
-            ]));
+    SliverList _buildSliverList = new SliverList(
+        delegate: new SliverChildBuilderDelegate(
+                (context, index) => _buildTile(_data[index]),
+                childCount: _data == null ? 0 : _data.length));
+
+      return new CustomScrollView (
+        slivers: <Widget>[
+          new SliverAppBar(
+            expandedHeight: 55.0,
+            floating: true,
+            pinned: false,
+            leading: new Icon(Icons.search),
+            actions: <Widget>[
+              new IconButton(
+                icon: new Icon(Icons.cancel),
+                onPressed: () { _clear(); },
+              )
+            ],
+            title: new TextField(
+                maxLines: 1,
+                maxLength: 20,
+                keyboardType: TextInputType.text,
+                controller: _controller,
+                onSubmitted: (String value) {
+                  _search(value);
+                },
+              style: new TextStyle(color: Colors.white, fontSize: 22.0),
+              )),
+          _isLoading ? _buildProgress : _buildSliverList,
+        ]
+    );
   }
 
-  void _addToFollow(dynamic follow) {
-    print(follow);
+  void _addToFollow(ListItem item) {
+    DocumentReference _db =
+      Firestore.instance
+          .collection('users')
+          .document(user.uid);
+    if (item is Account) {
+      _db.collection('followaccount')
+          .document(item.id.toString()).setData(item.toMap());
+    }
+    if (item is HashTag) {
+      _db.collection('followhashtag')
+          .document(item.id.toString()).setData(item.toMap());
+
+    }
+    if (item is Place) {
+      _db.collection('followplace')
+          .document(item.id.toString()).setData(item.toMap());
+
+    }
+  }
+
+  void _clear(){
+    _controller.clear();
+    setState(() {
+      _data.clear();
+    });
   }
 
   Future<String> _search(String search) async {

@@ -3,11 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:insta_app/models.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-final FirebaseAuth _auth = FirebaseAuth.instance;
+FirebaseUser user;
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -15,12 +14,18 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePage extends State<ProfilePage> with AutomaticKeepAliveClientMixin<ProfilePage>{
-  bool _isLoading = true;
-  bool _isLogin = false;
-  bool _isProfile = false;
 
   Profile _profile = new Profile();
-  Account _account = new Account();
+  Account _account;
+
+  Future<Account> _getAccount() async{
+    user = await FirebaseAuth.instance.currentUser();
+    DocumentSnapshot doc = await Firestore.instance
+        .collection('profile').document(user.uid).get();
+    Profile profile = Profile.fromDoc(doc);
+    Account account = await _getLogin(profile);
+    return account;
+  }
 
   Widget _buildProgress(){
     return new Center(
@@ -79,9 +84,6 @@ class _ProfilePage extends State<ProfilePage> with AutomaticKeepAliveClientMixin
                     new Text(account.fullName,
                       style: new TextStyle(color: Colors.black87, fontSize: 18.0 ),
                     ),
-                    const Divider(
-                      height: 2.0,
-                    ),
                   new Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
@@ -103,82 +105,27 @@ class _ProfilePage extends State<ProfilePage> with AutomaticKeepAliveClientMixin
                       ),
                       new Text('following',
                         style: new TextStyle(color: Colors.black87, fontSize: 16.0 ),
-                      ),
-                      const Divider(
-                        height: 2.0,
-                      ),
+                      )
                     ],)
                   ],)
                 ]));
   }
 
-  @override  void initState() {
-    _login();
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
-    if(_isLoading)
-      return _buildProgress();
-    else
-    if(!_isProfile)
-      return _buildForm();
-    if(_isLogin)
-      return _buildProfile(_account);
+    return new FutureBuilder<Account>(
+        future: _getAccount(),
+        builder: (BuildContext context, AsyncSnapshot<Account> snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return _buildProfile(snapshot.data);
+          }
+          else {
+            return _buildProgress();
+          }
+        });
   }
 
-  Future<Account> _login(){
-    _auth.currentUser().then((user){
-      print(user);
-        this._profile.uid = user.uid;
-        _getProfile(user.uid).then((profile){
-            if(profile==null){
-              setState(() {
-                _isProfile = false;
-                _isLogin = false;
-                _isLogin = false;
-              });
-              return null;
-            }
-            else{
-              _getLogin(profile).then((response){
-                  if(response is Map){
-                      _account = Account.fromJson(response);
-                      setState(() {
-                        _isProfile = true;
-                        _isLogin = true;
-                        _isLoading = false;
-                      });
-                  }
-                  else{
-                    setState(() {
-                      _isProfile = true;
-                      _isLogin = false;
-                      _isLoading = false;
-                    });
-                  }
-              });
-            }
-      });
-    });
-
-  }
-
-  Future<Profile> _getProfile(String uid) async {
-    var profile;
-    DocumentSnapshot doc = await Firestore.instance
-        .collection('profile')
-        .document(uid).get();
-      if (doc.exists) {
-        profile = Profile.fromJson(doc.data);
-        return profile;
-      }
-      else
-        throw Error;
-  }
-
-  Future<Map> _getLogin(Profile user) async {
+  Future<Account> _getLogin(Profile user) async {
     Map map = user.toMap();
     String data = json.encode(map);
     http.Response response = await http.post(Endpoint.LOGIN,
@@ -187,25 +134,20 @@ class _ProfilePage extends State<ProfilePage> with AutomaticKeepAliveClientMixin
           "Content-type": "application/json"
         },
         body: data);
-
     Map body = json.decode(response.body);
-    return body;
+    Account account = Account.fromJson(body);
+    return account;
   }
 
   Future<StandardResponse> _saveProfile(){
-    setState(() {
-      _isLoading = true;
-    });
     Firestore.instance
         .collection('profile')
         .document(_profile.uid)
         .setData(_profile.toMap()).then((value){
-          _login();
     });
   }
 
   // TODO: implement wantKeepAlive
   @override
   bool get wantKeepAlive => true;
-
 }

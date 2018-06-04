@@ -46,10 +46,13 @@ class _MainPageState extends State<MainPage> {
                 child: new SearchPage(),
               ),
               new Container(
-                child: new SecondPage(),
+                child: new WhiteListPage(),
               ),
               new Container(
-                  color: Colors.yellow,
+                color: Colors.yellow,
+              ),
+              new Container(
+                color: Colors.blue,
               )
             ],
             /// Specify the page controller
@@ -66,13 +69,17 @@ class _MainPageState extends State<MainPage> {
                   title: new Text("Search", style: new TextStyle(color: Colors.black54))
               ),
               new BottomNavigationBarItem(
-                  icon: new Icon(Icons.list, color: Colors.black54),
+                  icon: new Icon(Icons.star, color: Colors.black54),
                   title: new Text("Lists", style: new TextStyle(color: Colors.black54))
               ),
-              new BottomNavigationBarItem(
-                  icon: new Icon(Icons.group, color: Colors.black54),
-                  title: new Text("Follow"),
-              )
+            new BottomNavigationBarItem(
+              icon: new Icon(Icons.group, color: Colors.black54),
+              title: new Text("Follows", style: new TextStyle(color: Colors.black54)),
+            ),
+            new BottomNavigationBarItem(
+              icon: new Icon(Icons.people_outline, color: Colors.black54),
+              title: new Text("Followers", style: new TextStyle(color: Colors.black54)),
+            )
             ],
 
             /// Will be used to scroll to the next page
