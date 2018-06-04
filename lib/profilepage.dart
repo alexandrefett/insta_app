@@ -17,6 +17,7 @@ class _ProfilePage extends State<ProfilePage> with AutomaticKeepAliveClientMixin
 
   Profile _profile = new Profile();
   Account _account;
+  Singleton singleton = new Singleton();
 
   Future<Account> _getAccount() async{
     user = await FirebaseAuth.instance.currentUser();
@@ -24,6 +25,7 @@ class _ProfilePage extends State<ProfilePage> with AutomaticKeepAliveClientMixin
         .collection('profile').document(user.uid).get();
     Profile profile = Profile.fromDoc(doc);
     Account account = await _getLogin(profile);
+    singleton.account = account;
     return account;
   }
 
