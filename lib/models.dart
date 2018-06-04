@@ -28,7 +28,6 @@ class PageObject<T> {
   }
 }
 
-
 class PageInfo{
   bool hasNextPage;
   String endCursor;
