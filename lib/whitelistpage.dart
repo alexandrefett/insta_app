@@ -51,7 +51,7 @@ class _WhiteListPage extends State<WhiteListPage>
       key: new PageStorageKey('List'),
       stream: Firestore.instance
           .collection('users')
-          .document(user.uid)
+          .document(Singleton.instance.account.id.toString())
           .collection('whitelist')
           .snapshots(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {

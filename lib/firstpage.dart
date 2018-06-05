@@ -30,12 +30,11 @@ class FirstPage extends StatefulWidget {
 
 class FirstPageState extends State<FirstPage>{
 
-  Singleton singleton = new Singleton();
   Future<bool> _testUserLogged() async {
     print("_testUserLogged");
     final FirebaseUser currentUser = await _auth.currentUser();
     print(currentUser);
-    singleton.firebaseUser = currentUser;
+    Singleton.instance.firebaseUser = currentUser;
     if(currentUser!=null){
       return true;
     }

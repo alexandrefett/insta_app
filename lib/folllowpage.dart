@@ -3,8 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:insta_app/models.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:insta_app/session.dart';
 
 class FollowsPage extends StatefulWidget {
   @override
@@ -14,20 +13,23 @@ class FollowsPage extends StatefulWidget {
 class _FollowsPage extends State<FollowsPage>
     with AutomaticKeepAliveClientMixin<FollowsPage>{
 
-  Singleton singleton = new Singleton();
+  Session session = new Session();
   var _data = List<Account>();
-  var _pageinfo = new PageInfo(hasNextPage: false, endCursor: null);
+  var _pageinfo = new PageInfo(hasNextPage: true, endCursor: null);
 
   Future<List<Account>> _getFollows(int id, PageInfo pageInfo) async{
     Follows page;
-    http.Response response = await http.get(Endpoint.GET_FOLLOWS + '?id=$id&hasNext=${pageInfo.hasNextPage}&cursor=${pageInfo.endCursor}',
+    String url = Endpoint.GET_FOLLOWS + '?id=$id&hasNext=${pageInfo.hasNextPage}&cursor=${pageInfo.endCursor}';
+    Map map = await session.get(url);
+/*    http.Response response = await http.get(Endpoint.GET_FOLLOWS + '?id=$id&hasNext=${pageInfo.hasNextPage}&cursor=${pageInfo.endCursor}',
         headers: {
           "Accept": "application/json",
           "Content-type": "application/json"
         });
 
     print(response.body);
-    page = Follows.fromJson(json.decode(response.body));
+    */
+    page = Follows.fromJson(map);
     setState(() {
       _pageinfo = page.pageInfo;
       _data.addAll(page.nodes);
@@ -39,7 +41,7 @@ class _FollowsPage extends State<FollowsPage>
   @override
   Widget build(BuildContext context) {
     return new FutureBuilder<List<Account>>(
-        future: _getFollows(singleton.account.id, _pageinfo),
+        future: _getFollows(Singleton.instance.account.id, _pageinfo),
         builder: (BuildContext context, AsyncSnapshot<List<Account>> snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             return new ListView.builder(

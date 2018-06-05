@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart' as http;
 
 class Endpoint{
     static const DOMAIN_V1 = 'http://186.228.87.122:8080/api/v1';
@@ -15,15 +17,26 @@ class Endpoint{
 abstract class ListItem {}
 
 class Singleton {
-  static final Singleton _singleton = new Singleton._internal();
-  Account account;
-  FirebaseUser firebaseUser;
+  static Singleton instance = new Singleton._();
 
-  factory Singleton() {
-    return _singleton;
+  Account _account;
+  FirebaseUser _firebaseUser;
+
+  Singleton._();
+
+  FirebaseUser get firebaseUser => _firebaseUser;
+
+  set firebaseUser(FirebaseUser value) {
+    _firebaseUser = value;
   }
 
-  Singleton._internal();
+  Account get account => _account;
+
+  set account(Account value) {
+    _account = value;
+  }
+
+
 }
 
 class Follows {

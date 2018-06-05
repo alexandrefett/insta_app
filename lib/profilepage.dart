@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:insta_app/models.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:insta_app/session.dart';
 
 FirebaseUser user;
 
@@ -16,17 +17,20 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePage extends State<ProfilePage> with AutomaticKeepAliveClientMixin<ProfilePage>{
 
   Profile _profile = new Profile();
-  Account _account;
-  Singleton singleton = new Singleton();
+  Session session = new Session();
 
   Future<Account> _getAccount() async{
-    user = await FirebaseAuth.instance.currentUser();
-    DocumentSnapshot doc = await Firestore.instance
-        .collection('profile').document(user.uid).get();
-    Profile profile = Profile.fromDoc(doc);
-    Account account = await _getLogin(profile);
-    singleton.account = account;
-    return account;
+    if(Singleton.instance.account==null) {
+      user = await FirebaseAuth.instance.currentUser();
+      DocumentSnapshot doc = await Firestore.instance
+          .collection('profile').document(user.uid).get();
+      Profile profile = Profile.fromDoc(doc);
+      Singleton.instance.account = await _getLogin(profile);
+      return Singleton.instance.account;
+    }
+    else{
+      return null;
+    }
   }
 
   Widget _buildProgress(){
@@ -130,13 +134,15 @@ class _ProfilePage extends State<ProfilePage> with AutomaticKeepAliveClientMixin
   Future<Account> _getLogin(Profile user) async {
     Map map = user.toMap();
     String data = json.encode(map);
-    http.Response response = await http.post(Endpoint.LOGIN,
+    Map body = await session.post(Endpoint.LOGIN, data);
+/*    http.Response response = await http.post(Endpoint.LOGIN,
         headers: {
           "Accept": "application/json",
           "Content-type": "application/json"
         },
         body: data);
     Map body = json.decode(response.body);
+    */
     Account account = Account.fromJson(body);
     return account;
   }
