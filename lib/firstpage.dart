@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:insta_app/loginpage.dart';
 import 'package:insta_app/mainpage.dart';
+import 'package:insta_app/models.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -29,10 +30,12 @@ class FirstPage extends StatefulWidget {
 
 class FirstPageState extends State<FirstPage>{
 
+  Singleton singleton = new Singleton();
   Future<bool> _testUserLogged() async {
     print("_testUserLogged");
     final FirebaseUser currentUser = await _auth.currentUser();
     print(currentUser);
+    singleton.firebaseUser = currentUser;
     if(currentUser!=null){
       return true;
     }

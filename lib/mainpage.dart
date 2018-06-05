@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:insta_app/folllowpage.dart';
 import 'package:insta_app/profilepage.dart';
 import 'package:insta_app/requestedpage2.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -49,7 +50,7 @@ class _MainPageState extends State<MainPage> {
                 child: new WhiteListPage(),
               ),
               new Container(
-                color: Colors.yellow,
+                child: new FollowsPage()
               ),
               new Container(
                 color: Colors.blue,

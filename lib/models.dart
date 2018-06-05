@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Endpoint{
     static const DOMAIN_V1 = 'http://186.228.87.122:8080/api/v1';
@@ -13,17 +14,34 @@ class Endpoint{
 
 abstract class ListItem {}
 
-class PageObject<T> {
-  List<T> nodes;
+class Singleton {
+  static final Singleton _singleton = new Singleton._internal();
+  Account account;
+  FirebaseUser firebaseUser;
+
+  factory Singleton() {
+    return _singleton;
+  }
+
+  Singleton._internal();
+}
+
+class Follows {
+  List<Account> nodes;
   int count;
   PageInfo pageInfo;
 
-  PageObject({this.nodes, this.count, this.pageInfo});
-  factory PageObject.fromJson(Map<String, dynamic> map){
-    return new PageObject(
-        nodes: map['nodes'] as List,
-        count:map['count'],
-        pageInfo:PageInfo.fromJson(map['pageInfo'])
+  Follows({this.nodes, this.count, this.pageInfo});
+  factory Follows.fromJson(Map<String, dynamic> map){
+    var _data = map['data']['user']['edge_follow']['edges'] as List;
+    var _accounts = List<Account>();
+    _data.forEach((element){
+      _accounts.add(Account.fromJson(element));
+    });
+    return new Follows(
+        nodes: _accounts,
+        count:map['data']['user']['edge_follow']['count'],
+        pageInfo:PageInfo.fromJson(map['data']['user']['edge_follow']['page_info'])
     );
   }
 }
