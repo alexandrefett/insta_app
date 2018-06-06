@@ -52,9 +52,9 @@ class _SecondPage extends State<SecondPage>{
         }
     );
     return new Scaffold(
-      appBar:new AppBar(title: new Text("Requested Page"),
-      ),
-      body: listView
+      appBar:new AppBar(
+          title: new Text("Requested Page")),
+          body: listView
     );
   }
 

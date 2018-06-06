@@ -29,7 +29,7 @@ class _ProfilePage extends State<ProfilePage> with AutomaticKeepAliveClientMixin
       return Singleton.instance.account;
     }
     else{
-      return null;
+      return Singleton.instance.account;
     }
   }
 

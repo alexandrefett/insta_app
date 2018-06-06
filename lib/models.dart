@@ -35,8 +35,6 @@ class Singleton {
   set account(Account value) {
     _account = value;
   }
-
-
 }
 
 class Follows {
@@ -45,17 +43,40 @@ class Follows {
   PageInfo pageInfo;
 
   Follows({this.nodes, this.count, this.pageInfo});
+
   factory Follows.fromJson(Map<String, dynamic> map){
-    var _data = map['data']['user']['edge_follow']['edges'] as List;
-    var _accounts = List<Account>();
-    _data.forEach((element){
-      _accounts.add(Account.fromJson(element));
+
+    List data = map['data']['user']['edge_follow']['edges'] as List;
+    print(data.length);
+    List<Account> accounts = new List<Account>();
+
+    data.forEach((node){
+      print(node);
+      Map element = node['node'];
+      print(element);
+      accounts.add(new Account(
+        username: element['username'],
+        fullName: element['full_name'],
+        profilePicUrl: element['profile_pic_url'],
+        id: element['id'],
+        isVerified: element['is_verified'],
+        followedByViewer: element['followed_by_viewer'],
+        requestedByViewer: element['requested_by_viewer'],
+      ));
     });
     return new Follows(
-        nodes: _accounts,
+        nodes: accounts,
         count:map['data']['user']['edge_follow']['count'],
         pageInfo:PageInfo.fromJson(map['data']['user']['edge_follow']['page_info'])
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'nodes': nodes,
+      'count': count,
+      'page_info': pageInfo.toMap()
+    };
   }
 }
 
@@ -190,7 +211,19 @@ class Account implements ListItem{
         followedBy: map['followedBy']
     );
   }
-    factory Account.fromDoc(DocumentSnapshot map){
+  factory Account.fromInsta(Map<String, dynamic> map){
+    return new Account(
+      username: map['username'],
+      fullName: map['full_name'],
+      profilePicUrl: map['profile_pic_url'],
+      id: int.parse(map['id']),
+      isVerified: map['is_verified'],
+      followedByViewer: map['followed_by_viewer'],
+      requestedByViewer: map['requested_by_viewer']
+    );
+  }
+
+  factory Account.fromDoc(DocumentSnapshot map){
       return new Account(
           biography: map['biography'],
           id: map['id'],
