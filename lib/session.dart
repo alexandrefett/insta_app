@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 
 class Session {
   static final Session _session = new Session._internal();
+
   factory Session() {
     return _session;
   }
@@ -13,6 +14,7 @@ class Session {
   Map<String, String> headers = {};
 
   Future<Map> get(String url) async {
+    print(headers);
     http.Response response = await http.get(url, headers: headers);
     updateCookie(response);
     return json.decode(response.body);

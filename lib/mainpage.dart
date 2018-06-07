@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:insta_app/folllowerspage.dart';
 import 'package:insta_app/folllowpage.dart';
 import 'package:insta_app/profilepage.dart';
 import 'package:insta_app/requestedpage2.dart';
@@ -53,7 +54,7 @@ class _MainPageState extends State<MainPage> {
                 child: new FollowsPage()
               ),
               new Container(
-                color: Colors.blue,
+                  child: new FollowersPage()
               )
             ],
             /// Specify the page controller

@@ -12,6 +12,7 @@ class Endpoint{
     static const GET_PROFILE = DOMAIN_V1 + '/profile';
     static const GET_SEARCH = DOMAIN_V1 + '/search';
     static const GET_FOLLOWS = DOMAIN_V1 + '/follows';
+    static const GET_FOLLOWERS = DOMAIN_V1 + '/followers';
 }
 
 abstract class ListItem {}

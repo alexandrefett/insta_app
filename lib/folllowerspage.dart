@@ -5,13 +5,13 @@ import 'package:http/http.dart' as http;
 import 'package:insta_app/models.dart';
 import 'package:insta_app/session.dart';
 
-class FollowsPage extends StatefulWidget {
+class FollowersPage extends StatefulWidget {
   @override
-  _FollowsPage createState() => _FollowsPage();
+  _FollowersPage createState() => _FollowersPage();
 }
 
-class _FollowsPage extends State<FollowsPage>
-    with AutomaticKeepAliveClientMixin<FollowsPage> {
+class _FollowersPage extends State<FollowersPage>
+    with AutomaticKeepAliveClientMixin<FollowersPage> {
   Session session = new Session();
   bool _isLoading = false;
   var data = List<Account>();
@@ -20,9 +20,10 @@ class _FollowsPage extends State<FollowsPage>
   //Follows page;
 
   Future<List<Account>> _getFollows(int id, PageInfo pageInfo) async {
-    String url = Endpoint.GET_FOLLOWS +
+    String url = Endpoint.GET_FOLLOWERS +
         '?id=$id&hasNext=${pageInfo.hasNextPage}&cursor=${pageInfo.endCursor}';
     Map map = await session.get(url);
+    print(map);
     List acc = map['data']['user']['edge_follow']['edges'] as List;
     acc.forEach((element) {
       Map node = element['node'];
@@ -39,6 +40,9 @@ class _FollowsPage extends State<FollowsPage>
     return new FutureBuilder<List<Account>>(
         future: _getFollows(Singleton.instance.account.id, pageinfo),
         builder: (BuildContext context, AsyncSnapshot<List<Account>> snapshot) {
+          switch(snapshot.connectionState){
+            case:
+          }
           if(snapshot.connectionState==ConnectionState.waiting){
             _isLoading = true;
           }
