@@ -17,7 +17,7 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePage extends State<ProfilePage>
     with AutomaticKeepAliveClientMixin<ProfilePage> {
   Session session = new Session();
-
+  Stream<Account> _account;
   TextEditingController usernameController = new TextEditingController();
   TextEditingController passwordController = new TextEditingController();
 
@@ -127,9 +127,16 @@ class _ProfilePage extends State<ProfilePage>
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _account = _getAccount()?.asStream();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return new FutureBuilder<Account>(
-        future: _getAccount(),
+    return new StreamBuilder<Account>(
+        stream: _account,
         builder: (BuildContext context, AsyncSnapshot<Account> snapshot) {
           print(snapshot.connectionState);
           print(snapshot.hasData);
@@ -170,7 +177,11 @@ class _ProfilePage extends State<ProfilePage>
         .collection('profile')
         .document(profile.uid)
         .setData(profile.toMap())
-        .then((value) {});
+        .then((value) {
+          setState(() {
+            _account = _getAccount()?.asStream();
+          });
+    });
   }
 
   // TODO: implement wantKeepAlive

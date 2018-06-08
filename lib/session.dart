@@ -4,12 +4,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class Session {
-  static final Session _session = new Session._internal();
+  static Session instance = new Session._();
 
-  factory Session() {
-    return _session;
-  }
-  Session._internal();
+  Session._();
 
   Map<String, String> headers = {};
 

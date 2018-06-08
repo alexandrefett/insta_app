@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
+import 'package:insta_app/session.dart';
 
 class Endpoint{
     static const DOMAIN_V1 = 'http://186.228.87.122:8080/api/v1';
@@ -17,24 +18,64 @@ class Endpoint{
 
 abstract class ListItem {}
 
+
 class Singleton {
   static Singleton instance = new Singleton._();
-
+  Profile _profile;
   Account _account;
   FirebaseUser _firebaseUser;
 
   Singleton._();
 
-  FirebaseUser get firebaseUser => _firebaseUser;
+  Profile get profile => _profile;
+  set profile(Profile value){
+    Firestore.instance
+        .collection('profile')
+        .document(profile.uid)
+        .setData(profile.toMap());
+    _profile = value;
+  }
 
+  FirebaseUser get firebaseUser => _firebaseUser;
   set firebaseUser(FirebaseUser value) {
     _firebaseUser = value;
   }
 
   Account get account => _account;
-
   set account(Account value) {
     _account = value;
+  }
+
+  Future<Profile> currentProfile() async {
+    if(profile==null) {
+      FirebaseUser user = await FirebaseAuth.instance.currentUser();
+      DocumentSnapshot doc = await Firestore.instance
+          .collection('profile')
+          .document(user.uid)
+          .get();
+      if (!doc.exists) return null; //throw Error();
+      profile = Profile.fromDoc(doc);
+      return profile;
+    }
+    else
+      return _profile;
+  }
+
+  Future<Account> _getLogin() async {
+    if (_account == null) {
+      Map map = new Map();
+      if(firebaseUser==null)
+        firebaseUser = await FirebaseAuth.instance.currentUser();
+      map['token'] = firebaseUser.uid;
+
+      String data = json.encode(map);
+      Map body = await Session.instance.post(Endpoint.LOGIN, data);
+
+      Account account = Account.fromJson(body);
+      return account;
+    } else {
+      return account;
+    }
   }
 }
 
