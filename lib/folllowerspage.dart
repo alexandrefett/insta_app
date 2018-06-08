@@ -19,30 +19,27 @@ class _FollowersPage extends State<FollowersPage>
   var nextPage;
   //Follows page;
 
-  Future<List<Account>> _getFollows(int id, PageInfo pageInfo) async {
+  Future<List<Account>> _getFollowers(int id, PageInfo pageInfo) async {
     String url = Endpoint.GET_FOLLOWERS +
         '?id=$id&hasNext=${pageInfo.hasNextPage}&cursor=${pageInfo.endCursor}';
     Map map = await session.get(url);
     print(map);
-    List acc = map['data']['user']['edge_follow']['edges'] as List;
+    List acc = map['data']['user']['edge_followed_by']['edges'] as List;
     acc.forEach((element) {
       Map node = element['node'];
       Account a = Account.fromInsta(node);
       data.add(a);
     });
     nextPage =
-        PageInfo.fromJson(map['data']['user']['edge_follow']['page_info']);
+        PageInfo.fromJson(map['data']['user']['edge_followed_by']['page_info']);
     return data;
   }
 
   @override
   Widget build(BuildContext context) {
     return new FutureBuilder<List<Account>>(
-        future: _getFollows(Singleton.instance.account.id, pageinfo),
+        future: _getFollowers(Singleton.instance.account.id, pageinfo),
         builder: (BuildContext context, AsyncSnapshot<List<Account>> snapshot) {
-          switch(snapshot.connectionState){
-            case:
-          }
           if(snapshot.connectionState==ConnectionState.waiting){
             _isLoading = true;
           }

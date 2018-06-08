@@ -23,6 +23,7 @@ class _FollowsPage extends State<FollowsPage>
     String url = Endpoint.GET_FOLLOWS +
         '?id=$id&hasNext=${pageInfo.hasNextPage}&cursor=${pageInfo.endCursor}';
     Map map = await session.get(url);
+    print(map);
     List acc = map['data']['user']['edge_follow']['edges'] as List;
     acc.forEach((element) {
       Map node = element['node'];
@@ -39,6 +40,8 @@ class _FollowsPage extends State<FollowsPage>
     return new FutureBuilder<List<Account>>(
         future: _getFollows(Singleton.instance.account.id, pageinfo),
         builder: (BuildContext context, AsyncSnapshot<List<Account>> snapshot) {
+          print(_isLoading);
+          print(snapshot.connectionState);
           if(snapshot.connectionState==ConnectionState.waiting){
             _isLoading = true;
           }
@@ -56,7 +59,7 @@ class _FollowsPage extends State<FollowsPage>
   Widget createListView(BuildContext context, AsyncSnapshot snapshot) {
     List<Account> values = snapshot.data;
     return new ListView.builder(
-        itemCount: values.length, //pageinfo.hasNextPage ? values.length + 1: values.length,
+        itemCount: values.length,
         itemBuilder: (BuildContext context, int index) {
           if(index==values.length-1 && pageinfo.hasNextPage && !_isLoading){
             _updatePage();

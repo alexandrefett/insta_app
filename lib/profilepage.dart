@@ -24,6 +24,10 @@ class _ProfilePage extends State<ProfilePage> with AutomaticKeepAliveClientMixin
       user = await FirebaseAuth.instance.currentUser();
       DocumentSnapshot doc = await Firestore.instance
           .collection('profile').document(user.uid).get();
+      print('--------------------');
+      print(doc.data);
+      if(!doc.exists)
+        return null;
       Profile profile = Profile.fromDoc(doc);
       Singleton.instance.account = await _getLogin(profile);
       return Singleton.instance.account;
@@ -39,7 +43,9 @@ class _ProfilePage extends State<ProfilePage> with AutomaticKeepAliveClientMixin
   }
 
   Widget _buildForm() {
-    return new Form(
+    return
+      /*new Form(
+
         child: new Theme(
             data: new ThemeData(
                 brightness: Brightness.light,
@@ -47,7 +53,9 @@ class _ProfilePage extends State<ProfilePage> with AutomaticKeepAliveClientMixin
                 inputDecorationTheme: new InputDecorationTheme(
                     labelStyle:
                         new TextStyle(color: Colors.teal, fontSize: 20.0))),
-            child: new Container(
+            child:
+            */
+            new Container(
                 padding: const EdgeInsets.all(40.0),
                 child: new Column(children: <Widget>[
                   new TextField(
@@ -71,7 +79,7 @@ class _ProfilePage extends State<ProfilePage> with AutomaticKeepAliveClientMixin
                     onPressed: _saveProfile,
                     minWidth: 200.0,
                   ),
-                ]))));
+                ]));
   }
 
   Widget _buildProfile(Account account) {
@@ -122,11 +130,16 @@ class _ProfilePage extends State<ProfilePage> with AutomaticKeepAliveClientMixin
     return new FutureBuilder<Account>(
         future: _getAccount(),
         builder: (BuildContext context, AsyncSnapshot<Account> snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            return _buildProfile(snapshot.data);
-          }
-          else {
-            return _buildProgress();
+          print(snapshot.connectionState);
+          print(snapshot.hasData);
+          switch (snapshot.connectionState) {
+            case ConnectionState.none: return _buildProgress();
+            case ConnectionState.waiting: return _buildProgress();
+            default:
+              if (snapshot.hasData)
+                return _buildProfile(snapshot.data);
+              else
+                return _buildForm();
           }
         });
   }
