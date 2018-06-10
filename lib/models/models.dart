@@ -295,3 +295,8 @@ class StandardResponse {
 }
 
 enum Plan { FREE, LIGHT, TOP }
+class History {
+  final DateTime date;
+  final int follows;
+  final int followers;
+}

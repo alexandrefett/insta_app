@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:insta_app/models/models.dart';
 import 'package:insta_app/singleton/session.dart';
 import 'package:insta_app/singleton/singleton.dart';
-
+import 'package:charts_flutter/flutter.dart' as charts;
 Profile profile = new Profile();
 
 class ProfilePage extends StatefulWidget {
@@ -105,6 +105,7 @@ class _ProfilePage extends State<ProfilePage>
         ]));
   }
 
+
   @override
   void initState() {
     // TODO: implement initState
@@ -133,14 +134,27 @@ class _ProfilePage extends State<ProfilePage>
         });
   }
 
-/*  Future<Account> _getLogin(Profile user) async {
-    Map map = user.toMap();
-    String data = json.encode(map);
-    Map body = await session.post(Endpoint.LOGIN, data);
-    Account account = Account.fromJson(body);
-    return account;
+  Widget _buildChart(String uid){
+    return new StreamBuilder<QuerySnapshot>(
+      stream: Firestore.instance
+          .collection('users')
+          .document(uid)
+          .collection('history')
+          .snapshots(),
+      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        if (!snapshot.hasData) return new Text('Loading...');
+        return new ListView(
+          children: snapshot.data.documents.map((DocumentSnapshot document) {
+            return new ListTile(
+              title: new Text(document['title']),
+              subtitle: new Text(document['author']),
+            );
+          }).toList(),
+        );
+      },
+    );
   }
-*/
+
   Future<StandardResponse> _saveProfile() {
     profile.username = usernameController.text;
     profile.password = usernameController.text;
