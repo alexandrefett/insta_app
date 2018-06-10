@@ -1,9 +1,8 @@
-import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:insta_app/models.dart';
-import 'package:insta_app/session.dart';
+import 'package:insta_app/models/models.dart';
+import 'package:insta_app/singleton/session.dart';
+import 'package:insta_app/singleton/singleton.dart';
 
 class FollowersPage extends StatefulWidget {
   @override
@@ -12,7 +11,7 @@ class FollowersPage extends StatefulWidget {
 
 class _FollowersPage extends State<FollowersPage>
     with AutomaticKeepAliveClientMixin<FollowersPage> {
-  Session session = new Session();
+  Session session = Session.instance;
   bool _isLoading = false;
   var data = List<Account>();
   var pageinfo = new PageInfo(hasNextPage: true, endCursor: "");
@@ -20,10 +19,9 @@ class _FollowersPage extends State<FollowersPage>
   //Follows page;
 
   Future<List<Account>> _getFollowers(int id, PageInfo pageInfo) async {
-    String url = Endpoint.GET_FOLLOWERS +
+    String url = Session.GET_FOLLOWERS +
         '?id=$id&hasNext=${pageInfo.hasNextPage}&cursor=${pageInfo.endCursor}';
     Map map = await session.get(url);
-    print(map);
     List acc = map['data']['user']['edge_followed_by']['edges'] as List;
     acc.forEach((element) {
       Map node = element['node'];

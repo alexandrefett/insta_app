@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:insta_app/models.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:insta_app/models/models.dart';
 
 class SecondPage extends StatefulWidget {
   @override
@@ -134,7 +134,7 @@ class _SecondPage extends State<SecondPage> with AutomaticKeepAliveClientMixin<S
         _getRequested(_offset, 20)
             .then((List<Account> datas) => _updateDatas(offset, datas));
       }
-      data = new Account.loading();
+      data = new Account(username: "Loading...");
     }
     return data;
   }

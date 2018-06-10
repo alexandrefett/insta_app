@@ -1,12 +1,10 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
-import 'package:insta_app/loginpage.dart';
-import 'package:insta_app/mainpage.dart';
-import 'package:insta_app/models.dart';
+import 'package:insta_app/pages/loginpage.dart';
+import 'package:insta_app/pages/mainpage.dart';
+import 'package:insta_app/singleton/singleton.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 

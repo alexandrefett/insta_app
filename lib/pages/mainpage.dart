@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:insta_app/folllowerspage.dart';
-import 'package:insta_app/folllowpage.dart';
-import 'package:insta_app/profilepage.dart';
-import 'package:insta_app/requestedpage2.dart';
+import 'package:insta_app/pages/folllowerspage.dart';
+import 'package:insta_app/pages/folllowpage.dart';
+import 'package:insta_app/pages/profilepage.dart';
+import 'package:insta_app/pages/requestedpage2.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:insta_app/searchpage.dart';
-import 'package:insta_app/whitelistpage.dart';
+import 'package:insta_app/pages/searchpage.dart';
+import 'package:insta_app/pages/whitelistpage.dart';
 
 class MainPageApp extends StatelessWidget {
   @override

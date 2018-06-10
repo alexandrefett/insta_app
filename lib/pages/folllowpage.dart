@@ -1,9 +1,8 @@
-import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:insta_app/models.dart';
-import 'package:insta_app/session.dart';
+import 'package:insta_app/models/models.dart';
+import 'package:insta_app/singleton/session.dart';
+import 'package:insta_app/singleton/singleton.dart';
 
 class FollowsPage extends StatefulWidget {
   @override
@@ -12,7 +11,7 @@ class FollowsPage extends StatefulWidget {
 
 class _FollowsPage extends State<FollowsPage>
     with AutomaticKeepAliveClientMixin<FollowsPage> {
-  Session session = new Session();
+  Session session = Session.instance;
   bool _isLoading = false;
   var data = List<Account>();
   var pageinfo = new PageInfo(hasNextPage: true, endCursor: "");
@@ -20,7 +19,7 @@ class _FollowsPage extends State<FollowsPage>
   //Follows page;
 
   Future<List<Account>> _getFollows(int id, PageInfo pageInfo) async {
-    String url = Endpoint.GET_FOLLOWS +
+    String url = Session.GET_FOLLOWS +
         '?id=$id&hasNext=${pageInfo.hasNextPage}&cursor=${pageInfo.endCursor}';
     Map map = await session.get(url);
     print(map);
@@ -74,10 +73,10 @@ class _FollowsPage extends State<FollowsPage>
               style: new TextStyle(fontWeight: FontWeight.bold),
             ),
             subtitle: new Text(values[index].fullName),
-            trailing: new FlatButton(
+            trailing: new IconButton(
+                icon: new Icon(Icons.add_box),
                 onPressed: () {
-                },
-                child: new Text('Follow')),
+                }),
           );
         });
   }

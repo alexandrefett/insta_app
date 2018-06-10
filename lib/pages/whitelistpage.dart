@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:insta_app/models.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:insta_app/models/listtile.dart';
+import 'package:insta_app/models/models.dart';
+import 'package:insta_app/singleton/singleton.dart';
 
 FirebaseUser user;
 

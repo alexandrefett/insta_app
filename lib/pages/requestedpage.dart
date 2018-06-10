@@ -3,7 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:insta_app/models.dart';
+import 'package:insta_app/models/models.dart';
 
 class Requested2 extends StatelessWidget{
   @override
@@ -97,7 +97,7 @@ class _SecondPage extends State<SecondPage>{
         _getRequested(offset, 20)
             .then((List<Account> accounts) => _updateAccounts(offset, accounts));
       }
-      account = new Account.loading();
+      account = new Account(username: "Loading...");
     }
     return account;
   }

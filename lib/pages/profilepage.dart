@@ -1,11 +1,9 @@
-import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:insta_app/models.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:insta_app/session.dart';
+import 'package:insta_app/models/models.dart';
+import 'package:insta_app/singleton/session.dart';
+import 'package:insta_app/singleton/singleton.dart';
 
 Profile profile = new Profile();
 
@@ -16,29 +14,10 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePage extends State<ProfilePage>
     with AutomaticKeepAliveClientMixin<ProfilePage> {
-  Session session = new Session();
+  Session session = Session.instance;
   Stream<Account> _account;
   TextEditingController usernameController = new TextEditingController();
   TextEditingController passwordController = new TextEditingController();
-
-  Future<Account> _getAccount() async {
-    if (Singleton.instance.account == null) {
-      FirebaseUser user = await FirebaseAuth.instance.currentUser();
-      profile.uid = user.uid;
-      DocumentSnapshot doc = await Firestore.instance
-          .collection('profile')
-          .document(user.uid)
-          .get();
-      print('--------------------');
-      print(doc.data);
-      if (!doc.exists) return null;
-      profile = Profile.fromDoc(doc);
-      Singleton.instance.account = await _getLogin(profile);
-      return Singleton.instance.account;
-    } else {
-      return Singleton.instance.account;
-    }
-  }
 
   Widget _buildProgress() {
     return new Center(child: new CircularProgressIndicator());
@@ -130,7 +109,7 @@ class _ProfilePage extends State<ProfilePage>
   void initState() {
     // TODO: implement initState
     super.initState();
-    _account = _getAccount()?.asStream();
+    _account = Singleton.instance.login().asStream();
   }
 
   @override
@@ -154,22 +133,14 @@ class _ProfilePage extends State<ProfilePage>
         });
   }
 
-  Future<Account> _getLogin(Profile user) async {
+/*  Future<Account> _getLogin(Profile user) async {
     Map map = user.toMap();
     String data = json.encode(map);
     Map body = await session.post(Endpoint.LOGIN, data);
-/*    http.Response response = await http.post(Endpoint.LOGIN,
-        headers: {
-          "Accept": "application/json",
-          "Content-type": "application/json"
-        },
-        body: data);
-    Map body = json.decode(response.body);
-    */
     Account account = Account.fromJson(body);
     return account;
   }
-
+*/
   Future<StandardResponse> _saveProfile() {
     profile.username = usernameController.text;
     profile.password = usernameController.text;
@@ -179,7 +150,7 @@ class _ProfilePage extends State<ProfilePage>
         .setData(profile.toMap())
         .then((value) {
           setState(() {
-            _account = _getAccount()?.asStream();
+            _account = Singleton.instance.login().asStream();
           });
     });
   }
