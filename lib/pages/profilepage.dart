@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:insta_app/models/models.dart';
 import 'package:insta_app/singleton/session.dart';
 import 'package:insta_app/singleton/singleton.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
+
 Profile profile = new Profile();
 
 class ProfilePage extends StatefulWidget {
@@ -18,6 +20,7 @@ class _ProfilePage extends State<ProfilePage>
   Stream<Account> _account;
   TextEditingController usernameController = new TextEditingController();
   TextEditingController passwordController = new TextEditingController();
+  FirebaseUser user;
 
   Widget _buildProgress() {
     return new Center(child: new CircularProgressIndicator());
@@ -35,10 +38,11 @@ class _ProfilePage extends State<ProfilePage>
                       keyboardType: TextInputType.emailAddress,
                       controller: usernameController),
                   new TextFormField(
-                      decoration: new InputDecoration(labelText: "password"),
-                      keyboardType: TextInputType.text,
-                      obscureText: true,
-                      controller: passwordController,),
+                    decoration: new InputDecoration(labelText: "password"),
+                    keyboardType: TextInputType.text,
+                    obscureText: true,
+                    controller: passwordController,
+                  ),
                   new Padding(padding: const EdgeInsets.only(top: 20.0)),
                   new MaterialButton(
                     color: Colors.blueAccent,
@@ -101,17 +105,23 @@ class _ProfilePage extends State<ProfilePage>
                 ],
               )
             ],
-          )
-        ]));
+          ),
+          new Padding(
+            padding: new EdgeInsets.all(32.0),
+            child: new SizedBox(
+            height: 100.0,
+            child: _buildChart(user.uid),
+          ))
+    ]));
   }
-
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _account = Singleton.instance.login().asStream();
-  }
+    FirebaseAuth.instance.currentUser().then((onValue) => user = onValue);
+   }
 
   @override
   Widget build(BuildContext context) {
@@ -134,38 +144,54 @@ class _ProfilePage extends State<ProfilePage>
         });
   }
 
-  Widget _buildChart(String uid){
-    return new StreamBuilder<QuerySnapshot>(
-      stream: Firestore.instance
-          .collection('users')
-          .document(uid)
-          .collection('history')
-          .snapshots(),
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        if (!snapshot.hasData) return new Text('Loading...');
-        return new ListView(
-          children: snapshot.data.documents.map((DocumentSnapshot document) {
-            return new ListTile(
-              title: new Text(document['title']),
-              subtitle: new Text(document['author']),
-            );
-          }).toList(),
-        );
-      },
-    );
+  Future<List<charts.Series<History, DateTime>>> _getData(String uid) async {
+    List<History> list = new List<History>();
+    QuerySnapshot data = await Firestore.instance
+        .collection('users')
+        .document(uid)
+        .collection('history')
+        .getDocuments();
+
+    var docs = data.documents;
+    docs.forEach((element) {
+      print(element.data);
+      list.add(new History.fromDoc(element));
+    });
+
+    return [
+      new charts.Series<History, DateTime>(
+          id: 'Followers',
+          data: list,
+          domainFn: (History followers, _) => followers.date,
+          measureFn: (History followers, _) => followers.followers)
+    ];
   }
 
-  Future<StandardResponse> _saveProfile() {
+  Widget _buildChart(String uid) {
+    return new FutureBuilder<List<charts.Series<History, DateTime>>>(
+        future: _getData(uid),
+        builder: (BuildContext context,
+            AsyncSnapshot<List<charts.Series<History, DateTime>>> snapshot) {
+          if(snapshot.hasData)
+            return new charts.TimeSeriesChart(snapshot.data,
+              animate: true,
+              dateTimeFactory: const charts.LocalDateTimeFactory());
+          else
+            return _buildProgress();
+        });
+  }
+
+  Future<String> _saveProfile() {
     profile.username = usernameController.text;
-    profile.password = usernameController.text;
+    profile.password = passwordController.text;
     Firestore.instance
         .collection('profile')
         .document(profile.uid)
         .setData(profile.toMap())
         .then((value) {
-          setState(() {
-            _account = Singleton.instance.login().asStream();
-          });
+      setState(() {
+        _account = Singleton.instance.login().asStream();
+      });
     });
   }
 

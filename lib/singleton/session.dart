@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 
 class Session {
 
-  static const DOMAIN_V1 = 'http://186.228.87.123:8080/api/v1';
+  static const DOMAIN_V1 = 'http://186.228.87.122:8080/api/v1';
   static const LOGIN = DOMAIN_V1 + '/login';
   static const GET_ACCOUNT = DOMAIN_V1 + '/account';
   static const GET_PROFILE = DOMAIN_V1 + '/profile';

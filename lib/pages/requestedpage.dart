@@ -68,9 +68,7 @@ class _SecondPage extends State<SecondPage>{
     print(response.body);
     Map data = json.decode(response.body);
 
-    StandardResponse dataAccount = new StandardResponse.fromJson(data);
-    if(dataAccount.status=="SUCCESS") {
-      List list = dataAccount.data as List;
+      List list = data['data'] as List;
       var datas = new List<Account>();
       list.forEach((element){
         Map map = element as Map;
@@ -81,11 +79,6 @@ class _SecondPage extends State<SecondPage>{
         print("offset:$_offset");
       });
       return datas;
-    }
-    else {
-      List<Account> list = new List<Account>();
-      return list;
-    }
   }
 
   Account _getAccount(int index){

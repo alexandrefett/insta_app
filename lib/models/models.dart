@@ -137,7 +137,6 @@ class Place implements ListItem {
 
   @override
   String first() => title;
-
 }
 
 class Account implements ListItem {
@@ -276,27 +275,21 @@ class Profile {
   }
 }
 
-class StandardResponse {
-  String message;
-  String status;
-  dynamic data;
-
-  StandardResponse({this.message, this.status, this.data});
-
-  StandardResponse.fromJson(Map<String, dynamic> map) {
-    message = map['message'];
-    status = map['status'];
-    data = map['data'];
-  }
-
-  Map<String, dynamic> toMap() {
-    return {'message': message, 'status': status, 'data': data};
-  }
-}
-
 enum Plan { FREE, LIGHT, TOP }
+enum ProfileType { ACCOUNT, PLACE, HASHTAG }
+
 class History {
-  final DateTime date;
-  final int follows;
-  final int followers;
+  DateTime date;
+  int follows;
+  int followers;
+
+  History({this.date, this.follows, this.followers});
+
+  factory History.fromDoc(DocumentSnapshot doc){
+    return new History(
+      date: new DateTime.fromMicrosecondsSinceEpoch(doc['date']),
+      follows: doc['follows'],
+      followers: doc['followers']
+    );
+  }
 }
