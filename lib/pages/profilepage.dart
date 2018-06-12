@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:insta_app/models/models.dart';
-import 'package:insta_app/singleton/session.dart';
+import 'package:insta_app/singleton/session.dart' as session;
 import 'package:insta_app/singleton/singleton.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 
@@ -16,11 +16,9 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePage extends State<ProfilePage>
     with AutomaticKeepAliveClientMixin<ProfilePage> {
-  Session session = Session.instance;
-  Stream<Account> _account;
+
   TextEditingController usernameController = new TextEditingController();
   TextEditingController passwordController = new TextEditingController();
-  FirebaseUser user;
 
   Widget _buildProgress() {
     return new Center(child: new CircularProgressIndicator());
@@ -110,23 +108,20 @@ class _ProfilePage extends State<ProfilePage>
             padding: new EdgeInsets.all(32.0),
             child: new SizedBox(
             height: 100.0,
-            child: _buildChart(user.uid),
+            child: _buildChart(Singleton.instance.firebaseUser.uid),
           ))
     ]));
   }
 
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    _account = Singleton.instance.login().asStream();
-    FirebaseAuth.instance.currentUser().then((onValue) => user = onValue);
-   }
-
+  Widget build(BuildContext context) {
+    return _buildProfile(Singleton.instance.account);
+  }
+  /*
   @override
   Widget build(BuildContext context) {
     return new StreamBuilder<Account>(
-        stream: _account,
+        future: Singleton.instance.account,
         builder: (BuildContext context, AsyncSnapshot<Account> snapshot) {
           print(snapshot.connectionState);
           print(snapshot.hasData);
@@ -143,7 +138,7 @@ class _ProfilePage extends State<ProfilePage>
           }
         });
   }
-
+*/
   Future<List<charts.Series<History, DateTime>>> _getData(String uid) async {
     List<History> list = new List<History>();
     QuerySnapshot data = await Firestore.instance
@@ -191,7 +186,7 @@ class _ProfilePage extends State<ProfilePage>
         .setData(profile.toMap())
         .then((value) {
       setState(() {
-        _account = Singleton.instance.login().asStream();
+        //_account = Singleton.instance.login().asStream();
       });
     });
   }

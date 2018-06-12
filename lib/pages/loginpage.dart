@@ -4,9 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:insta_app/pages/mainpage.dart';
 import 'register.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
-
+import 'package:insta_app/singleton/session.dart'as session;
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final GoogleSignIn _googleSignIn = new GoogleSignIn();
 
@@ -47,7 +45,8 @@ class LoginPageState extends State<LoginPage> {
     assert(!user.isAnonymous);
     assert(await user.getIdToken() != null);
 
-    final FirebaseUser currentUser = await _auth.currentUser();
+    FirebaseUser currentUser = await session.loginFirebase();
+
     assert(user.uid == currentUser.uid);
     if (user.uid == currentUser.uid)
       Navigator.pushReplacement(

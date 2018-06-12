@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:insta_app/models/listtile.dart';
 import 'package:insta_app/models/models.dart';
 import 'package:insta_app/singleton/session.dart';
 import 'package:insta_app/singleton/singleton.dart';
@@ -11,7 +12,6 @@ class FollowersPage extends StatefulWidget {
 
 class _FollowersPage extends State<FollowersPage>
     with AutomaticKeepAliveClientMixin<FollowersPage> {
-  Session session = Session.instance;
   bool _isLoading = false;
   var data = List<Account>();
   var pageinfo = new PageInfo(hasNextPage: true, endCursor: "");
@@ -21,7 +21,7 @@ class _FollowersPage extends State<FollowersPage>
   Future<List<Account>> _getFollowers(int id, PageInfo pageInfo) async {
     String url = Session.GET_FOLLOWERS +
         '?id=$id&hasNext=${pageInfo.hasNextPage}&cursor=${pageInfo.endCursor}';
-    Map map = await session.get(url);
+    Map map = await Session.instance.get(url);
     List acc = map['data']['user']['edge_followed_by']['edges'] as List;
     acc.forEach((element) {
       Map node = element['node'];
@@ -61,20 +61,7 @@ class _FollowersPage extends State<FollowersPage>
             _updatePage();
             return _buildProgress;
           }
-          return new ListTile(
-            leading: new CircleAvatar(
-              backgroundImage: new NetworkImage(values[index].profilePicUrl),
-            ),
-            title: new Text(
-              values[index].username,
-              style: new TextStyle(fontWeight: FontWeight.bold),
-            ),
-            subtitle: new Text(values[index].fullName),
-            trailing: new FlatButton(
-                onPressed: () {
-                },
-                child: new Text('Follow')),
-          );
+          return new CustomTile(item: values[index], onPressed: (){});
         });
   }
 

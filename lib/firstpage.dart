@@ -1,15 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:insta_app/models/models.dart';
 import 'package:insta_app/pages/loginpage.dart';
 import 'package:insta_app/pages/mainpage.dart';
-import 'package:insta_app/singleton/singleton.dart';
-
-final FirebaseAuth _auth = FirebaseAuth.instance;
+import 'package:insta_app/singleton/session.dart' as session;
 
 void main() => runApp(new MyApp());
 
@@ -31,44 +25,28 @@ class FirstPage extends StatefulWidget {
 
 class FirstPageState extends State<FirstPage>{
 
-  Future<FirebaseUser> _testUserLogged() async {
-    print("_testUserLogged");
-    final FirebaseUser currentUser = await _auth.currentUser();
-    Singleton.instance.firebaseUser = currentUser;
-    return currentUser;
-  }
-
-  Future<Profile> _getProfile(String uid) async {
-    print("_testProfile");
-    DocumentSnapshot doc = await Firestore.instance
-        .collection('profile')
-        .document(uid).get();
-    if(doc.exists) {
-      final Profile profile = Profile.fromJson(doc.data);
-      Singleton.instance.profile = profile;
-    }
-    else
-      return null;
-  }
-
-  Future<Account> _getAccount(String token){
-
-  }
-
   @override
   void initState() {
     super.initState();
-    _testUserLogged().then((bool value) {
-      if(value)
+    session.loginFirebase().then((firebaseuser){
+      if(firebaseuser==null){
         new Future.delayed(new Duration(seconds:5), (){
           Navigator.pushReplacement(context,
-              new MaterialPageRoute(builder: (BuildContext context) =>  new MainPageApp()));
+              new MaterialPageRoute(builder: (BuildContext context) =>  new LoginPage()));
         });
-      else
-        new Future.delayed(new Duration(seconds:5), (){
-          Navigator.pushReplacement(context,
-          new MaterialPageRoute(builder: (BuildContext context) =>  new LoginPage()));
+      }
+      else {
+        session.loginProfile(firebaseuser.uid).then((profile) {
+          if(profile==null) {
+            session.loginAccount(profile.uid).then((account) {
+              new Future.delayed(new Duration(seconds:2), (){
+                Navigator.pushReplacement(context,
+                    new MaterialPageRoute(builder: (BuildContext context) =>  new MainPageApp()));
+              });
+            });
+          }
         });
+      }
     });
   }
 

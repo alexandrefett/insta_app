@@ -16,12 +16,6 @@ class _WhiteListPage extends State<WhiteListPage>
     with AutomaticKeepAliveClientMixin<WhiteListPage> {
   FirebaseUser user;
 
-  @override
-  void initState() {
-    FirebaseAuth.instance.currentUser()
-      .then((onValue) => user = onValue);
-    super.initState();
-  }
 
   Future<List<Account>> getData() async{
     var list = List<Account>();

@@ -7,8 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:insta_app/models/listtile.dart';
 import 'package:insta_app/models/models.dart';
 import 'package:insta_app/singleton/session.dart';
-
-FirebaseUser user;
+import 'package:insta_app/singleton/singleton.dart';
 
 class SearchPage extends StatefulWidget {
   @override
@@ -20,13 +19,6 @@ class _SearchPage extends State<SearchPage>
   List<ListItem> _data = new List<ListItem>();
   bool _isLoading = false;
   final TextEditingController _controller = new TextEditingController();
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    FirebaseAuth.instance.currentUser().then((onValue) => user = onValue);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,8 +59,8 @@ class _SearchPage extends State<SearchPage>
   }
 
   void _addToFollow(ListItem item) {
-    DocumentReference _db =
-        Firestore.instance.collection('users').document(user.uid);
+    DocumentReference _db = Firestore.instance
+        .collection('users').document(Singleton.instance.firebaseUser.uid);
     if (item is Account) {
       _db
           .collection('followaccount')
@@ -101,19 +93,6 @@ class _SearchPage extends State<SearchPage>
       _isLoading = true;
     });
     Map map = await Session.instance.get(Session.GET_SEARCH + '?query=$search');
-
-
-  }
-
-  Future<String> _search(String search) async {
-    setState(() {
-      _isLoading = true;
-    });
-    http.Response response = await http.get(
-        Session.GET_SEARCH + '?query=$search',
-        headers: {"Accept": "application/json"});
-    print(response.body);
-    Map map = json.decode(response.body);
     List accounts = map['users'] as List;
     List places = map['places'] as List;
     List hashtags = map['hashtags'] as List;

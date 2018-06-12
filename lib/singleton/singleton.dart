@@ -46,20 +46,4 @@ class Singleton {
     } else
       return _profile;
   }
-
-  Future<Account> login() async {
-    if (_account == null) {
-      Map map = new Map();
-      if (firebaseUser == null) {
-        firebaseUser = await FirebaseAuth.instance.currentUser();
-      }
-      map['token'] = firebaseUser.uid;
-      String data = json.encode(map);
-      Map body = await Session.instance.post(Session.LOGIN, data);
-      _account = Account.fromJson(body);
-      return _account;
-    } else {
-      return _account;
-    }
-  }
 }

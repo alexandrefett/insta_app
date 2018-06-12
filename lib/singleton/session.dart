@@ -1,7 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
+import 'package:insta_app/models/models.dart';
+import 'package:insta_app/singleton/singleton.dart';
 
 class Session {
 
@@ -37,11 +41,39 @@ class Session {
   void updateCookie(http.Response response) {
     String rawCookie = response.headers['set-cookie'];
     if (rawCookie != null) {
-      print('-----cookie-------');
-      print(rawCookie);
       int index = rawCookie.indexOf(';');
       headers['cookie'] =
       (index == -1) ? rawCookie : rawCookie.substring(0, index);
     }
   }
+}
+
+Future<FirebaseUser> loginFirebase() async {
+  print("_testUserLogged");
+  final FirebaseUser currentUser = await FirebaseAuth.instance.currentUser();
+  Singleton.instance.firebaseUser = currentUser;
+  return currentUser;
+}
+
+Future<Profile> loginProfile(String uid) async {
+  print("_testProfile");
+  DocumentSnapshot doc = await Firestore.instance
+      .collection('profile')
+      .document(uid).get();
+  if(doc.exists) {
+    final Profile profile = Profile.fromJson(doc.data);
+    Singleton.instance.profile = profile;
+  }
+  else
+    return null;
+}
+
+Future<Account> loginAccount(String token) async {
+  Map map = new Map();
+  map['token'] = token;
+  String data = json.encode(map);
+  Map body = await Session.instance.post(Session.LOGIN, data);
+  Account account = Account.fromJson(body);
+  Singleton.instance.account = account;
+  return account;
 }
