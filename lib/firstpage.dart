@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:insta_app/models/models.dart';
 import 'package:insta_app/pages/loginpage.dart';
 import 'package:insta_app/pages/mainpage.dart';
 import 'package:insta_app/singleton/singleton.dart';
@@ -28,17 +31,28 @@ class FirstPage extends StatefulWidget {
 
 class FirstPageState extends State<FirstPage>{
 
-  Future<bool> _testUserLogged() async {
+  Future<FirebaseUser> _testUserLogged() async {
     print("_testUserLogged");
     final FirebaseUser currentUser = await _auth.currentUser();
-    print(currentUser);
     Singleton.instance.firebaseUser = currentUser;
-    if(currentUser!=null){
-      return true;
+    return currentUser;
+  }
+
+  Future<Profile> _getProfile(String uid) async {
+    print("_testProfile");
+    DocumentSnapshot doc = await Firestore.instance
+        .collection('profile')
+        .document(uid).get();
+    if(doc.exists) {
+      final Profile profile = Profile.fromJson(doc.data);
+      Singleton.instance.profile = profile;
     }
-    else {
-      return false;
-    }
+    else
+      return null;
+  }
+
+  Future<Account> _getAccount(String token){
+
   }
 
   @override

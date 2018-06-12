@@ -150,6 +150,7 @@ class _ProfilePage extends State<ProfilePage>
         .collection('users')
         .document(uid)
         .collection('history')
+        .orderBy('date')
         .getDocuments();
 
     var docs = data.documents;

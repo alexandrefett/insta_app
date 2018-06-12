@@ -100,6 +100,15 @@ class _SearchPage extends State<SearchPage>
     setState(() {
       _isLoading = true;
     });
+    Map map = await Session.instance.get(Session.GET_SEARCH + '?query=$search');
+
+
+  }
+
+  Future<String> _search(String search) async {
+    setState(() {
+      _isLoading = true;
+    });
     http.Response response = await http.get(
         Session.GET_SEARCH + '?query=$search',
         headers: {"Accept": "application/json"});
